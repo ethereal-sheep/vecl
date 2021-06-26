@@ -6,7 +6,7 @@ library until the word may be used to describe it.<br/>
 
 ---
 
-## Goals
+### Goals
 The goals of the project are to:
 1. provide a multi-purpose set of containers with many use cases
 2. widen my knowledge on data structures and modern C++ techniques
