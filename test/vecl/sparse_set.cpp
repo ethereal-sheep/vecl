@@ -2,15 +2,28 @@
 #include <vecl/sparse_set.hpp>
 
 TEST(SPARSE_SET, constructor) {
-	vecl::sparse_set<uint32_t, 10> a;
-	vecl::sparse_set<uint64_t, 20> b;
-	vecl::sparse_set<size_t, 30> c;
+	vecl::sparse_set<uint32_t> a(10);
+	vecl::sparse_set<uint64_t> b;
+	vecl::sparse_set<size_t> c(30);
 
 	ASSERT_EQ(a.size(), 0);
 	ASSERT_EQ(a.max_size(), 10);
 	ASSERT_EQ(b.dense_size(), 0);
-	ASSERT_EQ(b.sparse_size(), 20);
-	ASSERT_EQ(c.size_value, 30);
+	ASSERT_EQ(c.sparse_size(), 30);
+}
+
+TEST(SPARSE_SET, range_constructor) {
+	std::vector<float> a;
+	int t = 50;
+	while (t--)
+		a.push_back(static_cast<float>(t));
+
+	vecl::sparse_set<size_t> b(a.begin(), a.end());
+
+	ASSERT_EQ(b.size(), a.size());
+	for (auto i : a)
+		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
+
 }
 
 TEST(SPARSE_SET, emplace_push_pop) {
@@ -113,4 +126,80 @@ TEST(SPARSE_SET, swap) {
 	ASSERT_EQ(*bit, 1);
 	ASSERT_EQ(a.count(1), 1);
 	ASSERT_EQ(b.count(0), 1);
+
+	swap(a, b);
+	ASSERT_EQ(*ait, 0);
+	ASSERT_EQ(*bit, 1);
+	ASSERT_EQ(b.count(1), 1);
+	ASSERT_EQ(a.count(0), 1);
+
+	a.swap(b);
+	ASSERT_EQ(*ait, 0);
+	ASSERT_EQ(*bit, 1);
+	ASSERT_EQ(a.count(1), 1);
+	ASSERT_EQ(b.count(0), 1);
+
+	b.swap(a);
+	ASSERT_EQ(*ait, 0);
+	ASSERT_EQ(*bit, 1);
+	ASSERT_EQ(b.count(1), 1);
+	ASSERT_EQ(a.count(0), 1);
+}
+
+TEST(SPARSE_SET, clear) {
+	vecl::sparse_set a;
+	int t = 1000;
+	while (--t)
+		a.push_back(t);
+	a.clear();
+
+	ASSERT_EQ(a.count(0), 0);
+	ASSERT_EQ(a.count(1), 0);
+	ASSERT_EQ(a.count(999), 0);
+	ASSERT_EQ(a.count(1000), 0);
+}
+
+TEST(SPARSE_SET, equal) {
+	vecl::sparse_set a;
+	vecl::sparse_set b;
+	vecl::sparse_set<size_t> c;
+	int t = 500;
+	while (t--)
+	{
+		a.push_back(t);
+		b.push_back(t);
+		c.push_back(t);
+	}
+	ASSERT_EQ(a, b);
+	ASSERT_EQ(a.set_equal(b), true);
+	ASSERT_EQ(vecl::set_equal(c, b), true);
+	ASSERT_EQ(vecl::set_equal(a,c,b), true);
+}
+
+TEST(SPARSE_SET, sort) {
+	vecl::sparse_set a = { 1,2,3,4,5 };
+	vecl::sparse_set b = { 5,4,1,2,3 };
+
+	b.sort();
+
+	ASSERT_EQ(a, b);
+}
+
+TEST(SPARSE_SET, merge) {
+	vecl::sparse_set a = { 1,2,3,4,5 };
+	vecl::sparse_set b = { 6,7,8,2,5 };
+	vecl::sparse_set c = { 1,2,3,4,5,6,7,8 };
+
+	a.merge(b);
+	EXPECT_EQ(a, c);
+	ASSERT_EQ(a.set_equal(c), true);
+}
+
+TEST(SPARSE_SET, intersect) {
+	vecl::sparse_set a = { 1,2,3,4,5 };
+	vecl::sparse_set b = { 6,7,8,2,5 };
+	vecl::sparse_set c = { 2,5 };
+
+	a.interect(b);
+	ASSERT_EQ(a.set_equal(c), true);
 }
