@@ -286,27 +286,39 @@ namespace vecl
 		 /**
 		  * @return Size of underlying dense array.
 		  */
-		VECL_NODISCARD size_type size() const { return _dense.size(); }
+		VECL_NODISCARD size_type size() const VECL_NOEXCEPT 
+		{ 
+			return _dense.size(); 
+		}
 
 		/**
 		 * @return Size of underlying sparse array.
 		 */
-		VECL_NODISCARD size_type max_size() const { return _sparse.size(); }
+		VECL_NODISCARD size_type max_size() const VECL_NOEXCEPT 
+		{ 
+			return _sparse.size(); 
+		}
 
 		/**
 		 * @return Size of underlying dense array.
 		 */
-		VECL_NODISCARD size_type dense_size() const { return _dense.size(); }
+		VECL_NODISCARD size_type dense_size() const VECL_NOEXCEPT 
+		{ 
+			return _dense.size(); 
+		}
 
 		/**
 		 * @return Size of underlying sparse array.
 		 */
-		VECL_NODISCARD size_type sparse_size() const { return _sparse.size(); }
+		VECL_NODISCARD size_type sparse_size() const VECL_NOEXCEPT 
+		{ 
+			return _sparse.size(); 
+		}
 
 		/**
 		 * @return Greatest value a key can have in the container.
 		 */
-		VECL_NODISCARD key_type max() const
+		VECL_NODISCARD key_type max() const VECL_NOEXCEPT
 		{
 			return static_cast<key_type>(_sparse.size() - 1);
 		}
@@ -314,7 +326,7 @@ namespace vecl
 		/**
 		 * @brief Checks if the key is a valid key in the container.
 		 */
-		VECL_NODISCARD bool valid(key_type key) const
+		VECL_NODISCARD bool valid(key_type key) const VECL_NOEXCEPT
 		{
 			return key <= max();
 		}
@@ -335,7 +347,7 @@ namespace vecl
 		/**
 		 * @brief Checks if the container is empty.
 		 */
-		VECL_NODISCARD bool empty() const { return _dense.empty(); }
+		VECL_NODISCARD bool empty() const VECL_NOEXCEPT { return _dense.empty(); }
 
 
 		/**
