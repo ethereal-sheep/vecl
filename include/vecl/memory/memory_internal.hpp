@@ -1,6 +1,8 @@
 #ifndef VECL_MEMORY_INTERNAL_HPP
 #define VECL_MEMORY_INTERNAL_HPP
 
+#include <memory_resource>
+
 namespace vecl
 {
 	/**

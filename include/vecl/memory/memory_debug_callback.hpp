@@ -25,11 +25,12 @@ namespace vecl
 		 */
 		OVER_ALIGNED,
 		/**
-		 * @brief Allocated memory block has been allocated again.
+		 * @brief Allocated memory block has been allocated again
+		 * by upstream.
 		 * @param level ERROR
 		 * @param address Always nullptr
 		 */
-		MEMORY_REALLOC,
+		 MEMORY_REALLOC,
 		/**
 		 * @brief Upstream has ran out of memory.
 		 * @param level ERROR
@@ -114,7 +115,7 @@ namespace vecl
 		/**
 		 * @brief Virtual Destructor.
 		 */
-		virtual ~memory_debug_callback() = 0 {}
+		virtual ~memory_debug_callback() {}
 	};
 
 	/**

@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
-#include <vecl/memory/memory_debug_mt.hpp>
-#include <vecl/memory/memory_debug.hpp>
+#include <vecl/memory.hpp>
 #include <vecl/sparse_set.hpp>
 
 TEST(MEMORY_DEBUG, test_vector_memory) {
@@ -25,6 +24,12 @@ TEST(MEMORY_DEBUG, test_sparse_memory) {
 			vecl::get_default_memory_debug_callback());
 
 		vecl::sparse_set b{{ 1,2,3,4,5 }, &a};
+	}
+	{
+		vecl::memory_debug a(
+			"aligned alloc",
+			vecl::get_default_memory_debug_callback(),
+			vecl::get_memory_aligned_alloc());
 	}
 
 	testing::internal::CaptureStdout();

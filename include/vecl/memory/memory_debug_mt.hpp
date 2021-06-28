@@ -5,18 +5,19 @@
 #include "memory_internal.hpp"
 #include "memory_debug_callback.hpp"
 
-#include <mutex>
-#include <string>
-#include <unordered_map>
+#include <mutex> // mutex
+#include <cstring> // memset
+#include <string> // string
+#include <unordered_map> // pmr::unordered_map
 
 namespace vecl
 {
 	/**
-	 * @brief Thread-safe debug_memory that provides runtime memory
+	 * @brief Thread-safe Debug Memory Resource that provides runtime memory
 	 * information such as statistics, history, leaks, and errors.
-	 * Note that if upstream resource is not thread-safe (such as
-	 * std::pmr::synchronized_pool_resource) then allocation/deallocation
-	 * may cause a data race. All other debug operations are thread-safe.
+	 * All operations are thread-safe if and only if upstream is thread-safe
+	 * (memory_malloc, std::pmr::synchronized_pool_resource, etc.). Otherwise, 
+	 * allocate/deallocate is undefined on multi-threaded applications.
 	 */
 	class memory_debug_mt : public memory
 	{
@@ -319,7 +320,7 @@ namespace vecl
 		}
 
 	protected:
-		[[nodiscard]] virtual void* do_allocate(
+		virtual void* do_allocate(
 			size_t bytes, 
 			size_t alignment) override
 		{
@@ -343,6 +344,9 @@ namespace vecl
 				// if upstream is not thread-safe
 				head = static_cast<aligned_header*>(
 					_upstream->allocate(block_size(bytes)));
+				
+				if (!head)
+					throw std::bad_alloc();
 			}
 			catch (const std::exception& a)
 			{

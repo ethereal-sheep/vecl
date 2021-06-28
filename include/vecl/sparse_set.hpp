@@ -7,10 +7,11 @@
 
 #include "config/config.h"
 
-#include <vector>
-#include <algorithm>
-#include <tuple>
-#include <numeric>
+#include <memory_resource> // pmr::memory_resource
+#include <vector> // pmr::vector
+#include <algorithm> // swap
+#include <tuple> // pair
+#include <numeric> // iota
 
 namespace vecl
 {

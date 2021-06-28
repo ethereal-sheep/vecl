@@ -5,14 +5,16 @@
 #include "memory_internal.hpp"
 #include "memory_debug_callback.hpp"
 
-#include <string>
-#include <unordered_map>
+#include <atomic> // atomic
+#include <cstring> // memset
+#include <string> // string
+#include <unordered_map> // pmr::unordered_map
 
 namespace vecl
 {
 	/**
-	 * @brief Debug_memory that provides runtime memory information such
-	 * as statistics, history, leaks, and errors.
+	 * @brief Debug Memory Resource that provides runtime memory information 
+	 * such as statistics, history, leaks, and errors.
 	 * Not thread-safe. See memory_debug_mt for thread-safe implementation.
 	 */
 	class memory_debug : public memory
@@ -316,7 +318,7 @@ namespace vecl
 		}
 
 	protected:
-		[[nodiscard]] virtual void* do_allocate(
+		virtual void* do_allocate(
 			size_t bytes,
 			size_t alignment) override
 		{

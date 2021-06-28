@@ -5,5 +5,7 @@
 #include "memory/memory_debug.hpp"
 #include "memory/memory_debug_mt.hpp"
 
+#include "memory/memory_malloc.hpp"
+#include "memory/memory_aligned_alloc.hpp"
 
 #endif
