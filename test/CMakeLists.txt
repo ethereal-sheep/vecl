@@ -27,7 +27,7 @@ function(BASIC_TEST TEST_NAME TEST_SOURCES)
 endfunction()
 
 
-#BASIC_TEST(HELLO_WORLD vecl/hello_world.cpp)
 
-BASIC_TEST(sparse_set vecl/sparse_set.cpp)
+#BASIC_TEST(HELLO_WORLD vecl/hello_world.cpp)
+#BASIC_TEST(sparse_set vecl/sparse_set.cpp)
 BASIC_TEST(memory_debug vecl/internal/memory_debug.cpp)

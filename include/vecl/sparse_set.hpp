@@ -6,8 +6,8 @@
 #endif
 
 #include "config/config.h"
-#include "internal/vector.hpp"
 
+#include <vector>
 #include <algorithm>
 #include <tuple>
 #include <numeric>
@@ -32,7 +32,7 @@ namespace vecl
 		 * @note TYPE TRAITS
 		 */
 		using id_type = Id_t;
-		using vector_type = vector<Id_t>;
+		using vector_type = std::pmr::vector<Id_t>;
 		using key_type = Id_t;
 		using value_type = Id_t;
 		using size_type = size_t;
@@ -713,8 +713,8 @@ namespace vecl
 			std::swap(_dense[from], _dense[to]);
 		}
 
-		vector<Id_t> _dense;
-		vector<Id_t> _sparse;
+		vector_type _dense;
+		vector_type _sparse;
 	};
 
 	/**
