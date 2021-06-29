@@ -9,10 +9,6 @@
 #define VECL_NODISCARD [[nodiscard]]
 #endif
 
-#ifndef VECL_USE_STL
-#define VECL_USE_STL
-#endif
-
 #ifdef VECL_DISABLE_ASSERT
 #undef VECL_ASSERT
 #define VECL_ASSERT(...) (void(0))

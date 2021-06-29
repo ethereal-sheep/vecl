@@ -31,7 +31,8 @@ TEST(SPARSE_SET, emplace_push_pop) {
 
 	ASSERT_EQ(a.empty(), true);
 
-	auto it = a.emplace_back(0);
+	auto [it, b] = a.emplace_back(0);
+	ASSERT_EQ(b, true);
 	ASSERT_EQ(*it, 0);
 	ASSERT_EQ(a.size(), 1);
 	ASSERT_EQ(a.count(0), 1);
@@ -117,9 +118,9 @@ TEST(SPARSE_SET, erase) {
 
 TEST(SPARSE_SET, swap) {
 	vecl::sparse_set a;
-	auto ait = a.emplace_back(0);
+	auto [ait, x] = a.emplace_back(0);
 	vecl::sparse_set b;
-	auto bit = b.emplace_back(1);
+	auto [bit, y] = b.emplace_back(1);
 
 	std::swap(a, b);
 	ASSERT_EQ(*ait, 0);

@@ -16,31 +16,49 @@
 namespace vecl
 {
 	/**
-	 * @brief Sparse Set data structure.
+	 * @brief Sparse Set is a contiguous container that contains strictly
+	 * integral keys.
+	 * 
 	 * Provides constant time insert, remove, and lookup, while providing
 	 * locality of reference.
-	 *
+	 * 
+	 * Since the set is contiguous, the data is ordered as well.
+	 * However, the ordering of data is not preserved when removing
+	 * an element from the set.
+	 * 
+	 * While the container allows random-access of its elements, the value
+	 * of the key is important in maintaining the integrity of the set.
+	 * As such, contents of the container are strictly read-only and are either
+	 * returned by value or by const-reference.
+	 * 
+	 * Therefore, algorithms like std::sort or std::remove cannot be used
+	 * with the set. The container, however, does provide suitable functions
+	 * to implement certain functions e.g. sparse_set::sort.
+	 * 
 	 * @tparam Id_t Unsigned integer type.
 	 */
 	template<
 		typename Id_t = uint32_t>
 		class sparse_set
 	{
-		static_assert(std::is_unsigned_v<Id_t>, "Id_t must be unsigned!");
+		static_assert(
+			::is_unsigned_v<Id_t>, 
+			"Id_t must be an unsigned integral type!");
 
 	public:
 		/**
 		 * @note TYPE TRAITS
 		 */
 		using id_type = Id_t;
-		using vector_type = std::pmr::vector<Id_t>;
+		using dense_array = std::pmr::vector<Id_t>;
+		using sparse_array = dense_array;
 		using key_type = Id_t;
 		using value_type = Id_t;
 		using size_type = size_t;
-		using difference_type = typename vector_type::difference_type;
-		using allocator_type = typename vector_type::allocator_type;
-		using iterator = typename vector_type::const_iterator;
-		using reverse_iterator = typename vector_type::const_reverse_iterator;
+		using difference_type = typename dense_array::difference_type;
+		using allocator_type = typename dense_array::allocator_type;
+		using iterator = typename dense_array::const_iterator;
+		using reverse_iterator = typename dense_array::const_reverse_iterator;
 
 
 		/**
@@ -115,10 +133,8 @@ namespace vecl
 			size_type max_size = VECL_SPARSE_SIZE,
 			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
 		) :
-			_dense(mr), _sparse(max_size, 0, mr)
+			sparse_set(il.begin(), il.end(), max_size, mr)
 		{
-			for (auto i : il)
-				push_back(static_cast<key_type>(i));
 		}
 
 		/**
@@ -356,8 +372,8 @@ namespace vecl
 		 */
 
 		 /**
-		  * @brief Accesses specified element at index by value. No bounds
-		  * check is performed.
+		  * @brief Vector style subscript operator. Accesses specified
+		  * element at index by value. No bounds check is performed.
 		  */
 		VECL_NODISCARD value_type operator[](size_t index) const
 		{
@@ -418,22 +434,21 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Appends the key to the end of the container and returns
-		 * an iterator that points to the newly created key. If key is invalid
-		 * or exists in the container, end() is returned.
+		 * @brief Appends the key to the end of the container and returns an
+		 * (iterator, outcome) pair.
+		 * 
+		 * (1) Key is emplaced successfully;
+		 * outcome is true and returning iterator points to newly created key.
+		 * (2) Key is contained in container;
+		 * outcome is false and returning iterator points to existing key.
+		 * (3) Key value > max();
+		 * outcome is false and returning iterator == end().
+		 *
+		 * @return (Iterator, Outcome) pair.
 		 */
-		iterator emplace_back(key_type key)
+		std::pair<iterator, bool> emplace_back(key_type key)
 		{
-			if (!valid(key))
-				return end();
-
-			if (!count(key))
-			{
-				_sparse[key] = static_cast<key_type>(_dense.size());
-				_dense.emplace_back(key);
-				return --end();
-			}
-			return begin() + _sparse[key];
+			return insert(key);
 		}
 
 		/**
@@ -464,6 +479,7 @@ namespace vecl
 		/**
 		 * @brief Inserts key into the container and returns an (iterator,
 		 * outcome) pair.
+		 * 
 		 * (1) Key is inserted successfully;
 		 * outcome is true and returning iterator points to newly created key.
 		 * (2) Key is contained in container;
@@ -502,7 +518,7 @@ namespace vecl
 		  */
 		iterator erase(key_type key)
 		{
-			if (valid(key) && count(key))
+			if (count(key))
 			{
 				auto other = _dense.back();
 				_swap(key, other);
@@ -539,7 +555,7 @@ namespace vecl
 		 */
 		bool remove(key_type key)
 		{
-			if (valid(key) && count(key))
+			if (count(key))
 			{
 				auto other = _dense.back();
 				_swap(key, other);
@@ -605,7 +621,7 @@ namespace vecl
 		  */
 		iterator find(key_type key) const
 		{
-			if (valid(key) && count(key))
+			if (count(key))
 				return begin() + _sparse[key];
 			return end();
 		}
@@ -616,7 +632,7 @@ namespace vecl
 		 */
 		size_type count(key_type key) const
 		{
-			if (empty())
+			if (empty() || !valid(key) || _sparse[key] >= size())
 				return false;
 			return _dense[_sparse[key]] == key;
 		}
@@ -714,8 +730,8 @@ namespace vecl
 			std::swap(_dense[from], _dense[to]);
 		}
 
-		vector_type _dense;
-		vector_type _sparse;
+		dense_array _dense;
+		dense_array _sparse;
 	};
 
 	/**
