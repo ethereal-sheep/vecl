@@ -13,3 +13,4 @@ _deps
 .vs
 out
 build
+*.out
