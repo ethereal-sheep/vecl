@@ -1,5 +1,6 @@
 #ifndef VECL_MEMORY_MALLOC_HPP
 #define VECL_MEMORY_MALLOC_HPP
+
 #include "../config/config.h"
 #include "memory_internal.hpp"
 
@@ -18,7 +19,9 @@ namespace vecl
 			[[maybe_unused]] size_t alignment
 		) override
 		{
-			return std::malloc(bytes);;
+			void* ptr = std::malloc(bytes);
+			if (!ptr) throw std::bad_alloc();
+			return ptr;
 		}
 		void do_deallocate(
 			void* ptr, 

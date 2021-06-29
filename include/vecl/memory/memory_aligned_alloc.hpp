@@ -27,11 +27,15 @@ namespace vecl
 			size_t alignment
 		) override
 		{
+			void* ptr;
 #ifdef _MSC_VER
-			return _aligned_malloc(bytes, alignment);
+			ptr = _aligned_malloc(bytes, alignment);
 #else
-			return ::aligned_alloc(alignment, bytes);
+			ptr = aligned_alloc(alignment, bytes);
 #endif
+			if (!ptr) throw std::bad_alloc();
+
+			return ptr;
 		}
 		void do_deallocate(
 			void* ptr,

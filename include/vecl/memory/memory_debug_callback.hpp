@@ -1,7 +1,7 @@
 #ifndef VECL_MEMORY_DEBUG_CALLBACK_HPP
 #define VECL_MEMORY_DEBUG_CALLBACK_HPP
 
-#include <iostream>
+#include <iostream> // cout, endl
 
 namespace vecl
 {
