@@ -8,6 +8,7 @@
 #include <malloc.h> // _aligned_malloc, _aligned_free
 #else
 #include <cstdlib> //aligned_alloc, free
+using std::aligned_alloc;
 #endif
 
 namespace vecl
@@ -45,7 +46,7 @@ namespace vecl
 #ifdef _MSC_VER
 			_aligned_free(ptr);
 #else
-			::free(ptr);
+			free(ptr);
 #endif
 		}
 		bool do_is_equal(const memory& other) const VECL_NOEXCEPT override
