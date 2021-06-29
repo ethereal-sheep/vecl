@@ -338,8 +338,6 @@ namespace vecl
 
 			try
 			{
-				// undefined on multi-threaded applications
-				// if upstream is not thread-safe
 				head = static_cast<aligned_header*>(
 					_upstream->allocate(block_size(bytes)));
 			}
