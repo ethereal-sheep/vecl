@@ -18,23 +18,23 @@ namespace vecl
 	/**
 	 * @brief Sparse Set is a contiguous container that contains strictly
 	 * integral keys.
-	 * 
+	 *
 	 * Provides constant time insert, remove, and lookup, while providing
 	 * locality of reference.
-	 * 
-	 * Since the set is contiguous, the data is ordered as well.
+	 *
+	 * Since the set container contiguous, the data is ordered as well.
 	 * However, the ordering of data is not preserved when removing
 	 * an element from the set.
-	 * 
+	 *
 	 * While the container allows random-access of its elements, the value
-	 * of the key is important in maintaining the integrity of the set.
+	 * of the key is important in maintaining the integrity of the container.
 	 * As such, contents of the container are strictly read-only and are either
 	 * returned by value or by const-reference.
-	 * 
+	 *
 	 * Therefore, algorithms like std::sort or std::remove cannot be used
 	 * with the set. The container, however, does provide suitable functions
 	 * to implement certain functions e.g. sparse_set::sort.
-	 * 
+	 *
 	 * @tparam Id_t Unsigned integer type.
 	 */
 	template<
@@ -42,7 +42,7 @@ namespace vecl
 		class sparse_set
 	{
 		static_assert(
-			::is_unsigned_v<Id_t>, 
+			std::is_unsigned_v<Id_t>,
 			"Id_t must be an unsigned integral type!");
 
 	public:
@@ -80,20 +80,19 @@ namespace vecl
 		{
 		}
 		/**
-		 * @brief Explicit Size Constructor. Explicitly sets the size of the
-		 * spares array and reserves the same amount in the dense array.
+		 * @brief Explicit Size Constructor. Explicitly sets the capacity of
+		 * the container.
 		 *
-		 * @param size Size of the underlying sparse array.
+		 * @param capacity Capacity of the map.
 		 * @param mr Pointer to a pmr resource. Default gets the default
 		 * global pmr resource via get_default_resource().
 		 */
 		explicit sparse_set(
-			size_type max_size,
+			size_type capacity,
 			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
 		) :
-			_dense(mr), _sparse(max_size, 0, mr)
+			_dense(mr), _sparse(capacity, 0, mr)
 		{
-			_dense.reserve(max_size);
 		}
 
 		/**
@@ -103,16 +102,17 @@ namespace vecl
 		 *
 		 * @param first Iterator to start of range.
 		 * @param last Iterator to end of range.
+		 * @param capacity Capacity of the map.
 		 * @param mr Pointer to a pmr resource. Default gets the default
 		 * global pmr resource via get_default_resource().
 		 */
 		template <typename It>
 		sparse_set(
 			It first, It last,
-			size_type max_size = VECL_SPARSE_SIZE,
+			size_type capacity = VECL_SPARSE_SIZE,
 			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
 		) :
-			_dense(mr), _sparse(max_size, 0, mr)
+			_dense(mr), _sparse(capacity, 0, mr)
 		{
 			for (; first != last; ++first)
 				push_back(static_cast<key_type>(*first));
@@ -124,24 +124,23 @@ namespace vecl
 		 * @tparam T Value type of initalizer list.
 		 *
 		 * @param il Initializer list.
+		 * @param capacity Capacity of the map.
 		 * @param mr Pointer to a pmr resource. Default gets the default
 		 * global pmr resource via get_default_resource().
 		 */
 		template <typename T>
 		sparse_set(
 			std::initializer_list<T> il,
-			size_type max_size = VECL_SPARSE_SIZE,
+			size_type capacity = VECL_SPARSE_SIZE,
 			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
 		) :
-			sparse_set(il.begin(), il.end(), max_size, mr)
+			sparse_set(il.begin(), il.end(), capacity, mr)
 		{
 		}
 
 		/**
 		 * @brief Default Copy Constructor. Uses same memory resource as
 		 * other.
-		 *
-		 * @param other Const-Ref to other.
 		 */
 		sparse_set(const sparse_set& other) = default;
 
@@ -149,7 +148,7 @@ namespace vecl
 		 * @brief Memory-Extended Copy Constructor. Uses provided
 		 * memory_resource to allocate copied arrays from other.
 		 *
-		 * @param other Const-Ref to other.
+		 * @param other Const-reference to other.
 		 * @param mr Pointer to a pmr resource.
 		 */
 		sparse_set(
@@ -164,8 +163,6 @@ namespace vecl
 		 * @brief Default Move Constructor. Constructs container with
 		 * the contents of other using move-semantics. After the move, other
 		 * is guaranteed to be empty().
-		 *
-		 * @param other Universal-Ref to other.
 		 */
 		sparse_set(sparse_set&& other) = default;
 
@@ -175,7 +172,7 @@ namespace vecl
 		 * construction resolves to a Memory-Extended copy construction. In
 		 * which case, other is not guranteed to be empty after the move.
 		 *
-		 * @param other Universal-Ref to other.
+		 * @param other Universal-reference to other.
 		 * @param mr Pointer to a pmr resource.
 		 */
 		sparse_set(
@@ -193,7 +190,7 @@ namespace vecl
 		 * other. If the memory_resource of this is equal to that of other,
 		 * the memory owned by this may be reused when possible.
 		 *
-		 * @param other Const-Ref to other.
+		 * @param other Const-reference to other.
 		 */
 		sparse_set& operator=(const sparse_set& other) = default;
 
@@ -203,7 +200,7 @@ namespace vecl
 		 * the memory owned by this may be reused when possible. Else, the
 		 * assignment resolves to a copy-assignment.
 		 *
-		 * @param other Universal-Ref to other.
+		 * @param other Universal-reference to other.
 		 */
 		sparse_set& operator=(sparse_set&& other) = default;
 
@@ -251,49 +248,73 @@ namespace vecl
 		  * @brief Standard Iterable Object boilerplate.
 		  * @return Iterator to beginning of range.
 		  */
-		VECL_NODISCARD iterator begin() const { return _dense.cbegin(); }
+		VECL_NODISCARD iterator begin() const VECL_NOEXCEPT 
+		{ 
+			return _dense.cbegin(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Iterator to end of range.
 		 */
-		VECL_NODISCARD iterator end() const { return _dense.cend(); }
+		VECL_NODISCARD iterator end() const VECL_NOEXCEPT 
+		{ 
+			return _dense.cend(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Iterator to beginning of range.
 		 */
-		VECL_NODISCARD iterator cbegin() const { return _dense.cbegin(); }
+		VECL_NODISCARD iterator cbegin() const VECL_NOEXCEPT 
+		{ 
+			return _dense.cbegin(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Iterator to end of range.
 		 */
-		VECL_NODISCARD iterator cend() const { return _dense.cend(); }
+		VECL_NODISCARD iterator cend() const VECL_NOEXCEPT 
+		{ 
+			return _dense.cend(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Reverse Iterator to beginning of range.
 		 */
-		VECL_NODISCARD iterator rbegin() const { return _dense.crbegin(); }
+		VECL_NODISCARD iterator rbegin() const VECL_NOEXCEPT 
+		{ 
+			return _dense.crbegin(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Reverse Iterator to end of range.
 		 */
-		VECL_NODISCARD iterator rend() const { return _dense.crend(); }
+		VECL_NODISCARD iterator rend() const VECL_NOEXCEPT 
+		{ 
+			return _dense.crend(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Reverse Iterator to beginning of range.
 		 */
-		VECL_NODISCARD iterator crbegin() const { return _dense.crbegin(); }
+		VECL_NODISCARD iterator crbegin() const VECL_NOEXCEPT 
+		{ 
+			return _dense.crbegin(); 
+		}
 
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Reverse Iterator to end of range.
 		 */
-		VECL_NODISCARD iterator crend() const { return _dense.crend(); }
+		VECL_NODISCARD iterator crend() const VECL_NOEXCEPT
+		{ 
+			return _dense.crend(); 
+		}
 
 
 		/**
@@ -303,33 +324,33 @@ namespace vecl
 		 /**
 		  * @return Size of underlying dense array.
 		  */
-		VECL_NODISCARD size_type size() const VECL_NOEXCEPT 
-		{ 
-			return _dense.size(); 
+		VECL_NODISCARD size_type size() const VECL_NOEXCEPT
+		{
+			return _dense.size();
 		}
 
 		/**
 		 * @return Size of underlying sparse array.
 		 */
-		VECL_NODISCARD size_type max_size() const VECL_NOEXCEPT 
-		{ 
-			return _sparse.size(); 
+		VECL_NODISCARD size_type max_size() const VECL_NOEXCEPT
+		{
+			return _sparse.size();
 		}
 
 		/**
 		 * @return Size of underlying dense array.
 		 */
-		VECL_NODISCARD size_type dense_size() const VECL_NOEXCEPT 
-		{ 
-			return _dense.size(); 
+		VECL_NODISCARD size_type dense_size() const VECL_NOEXCEPT
+		{
+			return _dense.size();
 		}
 
 		/**
 		 * @return Size of underlying sparse array.
 		 */
-		VECL_NODISCARD size_type sparse_size() const VECL_NOEXCEPT 
-		{ 
-			return _sparse.size(); 
+		VECL_NODISCARD size_type sparse_size() const VECL_NOEXCEPT
+		{
+			return _sparse.size();
 		}
 
 		/**
@@ -370,32 +391,22 @@ namespace vecl
 		/**
 		 * @note ELEMENT ACCESS
 		 */
-
 		 /**
-		  * @brief Vector style subscript operator. Accesses specified
-		  * element at index by value. No bounds check is performed.
+		  * @brief Accesses specified key at index by value with bounds
+		  * checking.
+		  * @throw std::out_of_range if index is not within the range of the
+		  * container.
 		  */
-		VECL_NODISCARD value_type operator[](size_t index) const
-		{
-			return _dense[index];
-		}
-
-		/**
-		 * @brief Accesses specified element at index by value with bounds
-		 * checking.
-		 * @throw std::out_of_range if index is not within the range of the
-		 * container.
-		 */
-		VECL_NODISCARD value_type at(size_t index) const
+		VECL_NODISCARD key_type key_at(size_t index) const
 		{
 			return _dense.at(index);
 		}
 
 		/**
-		 * @brief Accesses specified element at index by const pointer with
+		 * @brief Accesses specified key at index by const pointer with
 		 * bounds checking. Returns nullptr if index is out of range.
 		 */
-		VECL_NODISCARD const value_type* at_if(size_t index) const VECL_NOEXCEPT
+		VECL_NODISCARD const key_type* key_at_if(size_t index) const VECL_NOEXCEPT
 		{
 			if (index < size())
 				return &_dense.at(index);
@@ -436,7 +447,7 @@ namespace vecl
 		/**
 		 * @brief Appends the key to the end of the container and returns an
 		 * (iterator, outcome) pair.
-		 * 
+		 *
 		 * (1) Key is emplaced successfully;
 		 * outcome is true and returning iterator points to newly created key.
 		 * (2) Key is contained in container;
@@ -461,8 +472,8 @@ namespace vecl
 
 			if (!count(key))
 			{
-				_sparse[key] = static_cast<key_type>(_dense.size());
 				_dense.emplace_back(key);
+				_sparse[key] = static_cast<key_type>(_dense.size() - 1);
 			}
 		}
 
@@ -479,7 +490,7 @@ namespace vecl
 		/**
 		 * @brief Inserts key into the container and returns an (iterator,
 		 * outcome) pair.
-		 * 
+		 *
 		 * (1) Key is inserted successfully;
 		 * outcome is true and returning iterator points to newly created key.
 		 * (2) Key is contained in container;
@@ -496,8 +507,8 @@ namespace vecl
 
 			if (!count(key))
 			{
-				_sparse[key] = static_cast<key_type>(_dense.size());
 				_dense.emplace_back(key);
+				_sparse[key] = static_cast<key_type>(_dense.size() - 1);
 				return std::make_pair(--end(), true);
 			}
 			return std::make_pair(begin() + _sparse[key], false);
@@ -508,14 +519,16 @@ namespace vecl
 		 */
 		 /*iterator insert(std::initializer_list<value_type> il) {}*/
 
-		 /**
-		  * @brief Erases a key from the container and returns an iterator
-		  * to the replacing element. end() is returned if the key is invalid,
-		  * if the key is not found in the container, or if the container is
-		  * empty after the operation.
-		  *
-		  * @return Iterator to replacing element.
-		  */
+		/**
+		 * @brief Erases a key from the container and returns an iterator
+		 * to the replacing element.
+		 * If the key is either
+		 * invalid or not found in the container; or
+		 * if the container is empty after the operation,
+		 * end() is returned.
+		 *
+		 * @return Iterator to replacing element.
+		 */
 		iterator erase(key_type key)
 		{
 			if (count(key))
@@ -531,8 +544,8 @@ namespace vecl
 
 		/**
 		 * @brief Erases an iterator from the container and returns an iterator
-		 * to the replacing element. end() is returned if container is
-		 * empty after the operation.
+		 * to the replacing element. If container is empty after the operation,
+		 * end() is returned.
 		 * @return Iterator to replacing element.
 		 */
 		iterator erase(iterator position)
@@ -666,6 +679,19 @@ namespace vecl
 
 			return true;
 		}
+		/**
+		 * @brief Set Equal operation.
+		 * @returns True if all keys in this is contained in other.
+		 */
+		template<typename It>
+		bool set_equal(It start, It end) const
+		{
+			for (; start != end; ++start)
+				if (!count(static_cast<key_type>(*start)))
+					return false;
+
+			return true;
+		}
 
 		/**
 		 * @brief Merge operation. Merges other into the container.
@@ -678,7 +704,7 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Intersect operation. Removes any key in container 
+		 * @brief Intersect operation. Removes any key in container
 		 * not contained in other.
 		 */
 		template<typename TOther>
@@ -698,20 +724,30 @@ namespace vecl
 		 * @note NON-MEMBER FUNCTIONS
 		 */
 
-		/**
-		 * @brief Operator== overload. Compares keys orderwise within the
-		 * container. See equal() for set equality comparison function.
-		 */
+		 /**
+		  * @brief Operator== overload. Compares keys orderwise within the
+		  * container. See equal() for set equality comparison function.
+		  */
 		friend bool operator==(
 			const sparse_set& lhs,
 			const sparse_set& rhs)
 		{
 			return lhs._dense == rhs._dense;
 		}
+		/**
+		 * @brief Operator!= overload. Compares keys orderwise within the
+		 * container.
+		 */
+		friend bool operator!=(
+			const sparse_set& lhs,
+			const sparse_set& rhs)
+		{
+			return !(lhs == rhs);
+		}
 
 		/**
 		 * @brief Swaps the contents of two sparse sets. The swap operation
-		 * of two sparse_sets with different memory_resource is undefined.
+		 * of two sets with different memory_resource is undefined.
 		 */
 		friend void swap(sparse_set& lhs, sparse_set& rhs) VECL_NOEXCEPT
 		{
