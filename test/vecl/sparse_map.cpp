@@ -291,5 +291,6 @@ TEST(SPARSE_MAP, sort) {
 
 	ASSERT_NE(b, a);
 	b.sort();
+	ASSERT_EQ(a, b);
 }
 

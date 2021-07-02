@@ -1118,8 +1118,8 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Operator!= overload. Compares keys orderwise within the
-		 * container.
+		 * @brief Operator!= overload. Compares keys and elements orderwise 
+		 * within the container.
 		 */
 		friend bool operator!=(
 			const sparse_map& lhs,

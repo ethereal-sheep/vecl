@@ -58,8 +58,10 @@ namespace vecl
 	/**
 	 * @brief Returns a pointer to a memory resource using
 	 * std::alloc_aligned and std::free for resource acquistion.
-	 * Useful for over-aligned allocations required by some libraries.
-	 * Thread-safety of std::alloc_aligned is guaranteed.
+	 * Useful for over-aligned allocations when there are
+	 * stricter alignment requirements.
+	 * Thread-safety of aligned_alloc is implementation dependent.
+	 * std::aligned_alloc is guaranteed to be thread-safe.
 	 */
 	static inline memory* get_memory_aligned_alloc()
 	{
