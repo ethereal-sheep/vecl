@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <vecl/sparse_map.hpp>
+#include <vecl/memory.hpp>
 
 using sparse = vecl::sparse_map<uint32_t, std::string>;
 
@@ -60,11 +61,28 @@ TEST(SPARSE_MAP, move_constructor) {
 		{1, "string"}, {2, "string"}, {3, "string"}
 	};
 
-	sparse a{ std::move(b), std::pmr::get_default_resource() };
+	sparse a{ std::move(b)};
 	ASSERT_EQ(a.count(1), 1);
 	ASSERT_EQ(a.count(2), 1);
 	ASSERT_EQ(a.count(3), 1);
 	ASSERT_EQ(b.size(), 0);
+	ASSERT_EQ(a[1], "string");
+}
+TEST(SPARSE_MAP, move_assign_lol) {
+
+	sparse b =
+	{
+		{1, "string"}, {2, "string"}, {3, "string"}
+	};
+
+	sparse a{ vecl::get_memory_malloc() };
+
+	a = std::move(b);
+
+	ASSERT_EQ(a.count(1), 1);
+	ASSERT_EQ(a.count(2), 1);
+	ASSERT_EQ(a.count(3), 1);
+	ASSERT_EQ(b.size(), 3);
 	ASSERT_EQ(a[1], "string");
 }
 TEST(SPARSE_MAP, copy_assign) {

@@ -16,7 +16,7 @@
 namespace vecl
 {
 	/**
-	 * @brief Sparse Set is a contiguous container that contains strictly
+	 * @brief A Sparse Set is a contiguous container that contains strictly
 	 * integral keys.
 	 *
 	 * Provides constant time insert, remove, and lookup, while providing
@@ -35,28 +35,28 @@ namespace vecl
 	 * with the set. The container, however, does provide suitable functions
 	 * to implement certain functions e.g. sparse_set::sort.
 	 *
-	 * @tparam Id_t Unsigned integer type.
+	 * @tparam Id Unsigned integer type.
 	 */
 	template<
-		typename Id_t = uint32_t>
+		typename Id = uint32_t>
 		class sparse_set
 	{
 		static_assert(
-			std::is_unsigned_v<Id_t>,
-			"Id_t must be an unsigned integral type!");
+			std::is_unsigned_v<Id>,
+			"Id must be an unsigned integral type!");
 
 	public:
 		/**
 		 * @note TYPE TRAITS
 		 */
-		using id_type = Id_t;
-		using dense_array = std::pmr::vector<Id_t>;
+		using id_type = Id;
+		using dense_array = std::pmr::vector<Id>;
 		using sparse_array = dense_array;
-		using key_type = Id_t;
-		using value_type = Id_t;
+		using key_type = id_type;
+		using value_type = id_type;
 		using size_type = size_t;
 		using difference_type = typename dense_array::difference_type;
-		using allocator_type = typename dense_array::allocator_type;
+		using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
 		using iterator = typename dense_array::const_iterator;
 		using reverse_iterator = typename dense_array::const_reverse_iterator;
 
@@ -74,7 +74,7 @@ namespace vecl
 		  * global pmr resource via get_default_resource().
 		  */
 		explicit sparse_set(
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _sparse(VECL_SPARSE_SIZE, 0, mr)
 		{
@@ -89,7 +89,7 @@ namespace vecl
 		 */
 		explicit sparse_set(
 			size_type capacity,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _sparse(capacity, 0, mr)
 		{
@@ -110,7 +110,7 @@ namespace vecl
 		sparse_set(
 			It first, It last,
 			size_type capacity = VECL_SPARSE_SIZE,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _sparse(capacity, 0, mr)
 		{
@@ -132,7 +132,7 @@ namespace vecl
 		sparse_set(
 			std::initializer_list<T> il,
 			size_type capacity = VECL_SPARSE_SIZE,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			sparse_set(il.begin(), il.end(), capacity, mr)
 		{
@@ -153,7 +153,7 @@ namespace vecl
 		 */
 		sparse_set(
 			const sparse_set& other,
-			std::pmr::memory_resource* mr
+			allocator_type mr
 		) :
 			_dense(other._dense, mr), _sparse(other._sparse, mr)
 		{
@@ -162,7 +162,7 @@ namespace vecl
 		/**
 		 * @brief Default Move Constructor. Constructs container with
 		 * the contents of other using move-semantics. After the move, other
-		 * is guaranteed to be empty().
+		 * is guaranteed to be empty.
 		 */
 		sparse_set(sparse_set&& other) = default;
 
@@ -177,7 +177,7 @@ namespace vecl
 		 */
 		sparse_set(
 			sparse_set&& other,
-			std::pmr::memory_resource* mr
+			allocator_type mr
 		) :
 			_dense(std::move(other._dense), mr),
 			_sparse(std::move(other._sparse), mr)
@@ -601,7 +601,7 @@ namespace vecl
 		template <typename Pred>
 		void sort(Pred&& pred)
 		{
-			std::vector<Id_t> copy(size());
+			std::vector<Id> copy(size());
 			std::iota(copy.begin(), copy.end(), 0);
 			std::sort(copy.begin(), copy.end(),
 				[&pred, this](const auto l, const auto r)
@@ -609,7 +609,7 @@ namespace vecl
 					return pred(_dense[l], _dense[r]);
 				});
 
-			for (Id_t i = 0, len = static_cast<Id_t>(size()); i < len; ++i)
+			for (Id i = 0, len = static_cast<Id>(size()); i < len; ++i)
 			{
 				auto curr = i;
 				auto next = copy[curr];
@@ -757,7 +757,7 @@ namespace vecl
 
 	private:
 
-		void _swap(Id_t rhs, Id_t lhs)
+		void _swap(Id rhs, Id lhs)
 		{
 			auto from = _sparse[lhs];
 			auto to = _sparse[rhs];
@@ -775,7 +775,7 @@ namespace vecl
 	 * @returns True if all sparse sets contain the same keys.
 	 */
 	template<typename Lhs, typename... Rhs>
-	bool set_equal(
+	inline bool set_equal(
 		const sparse_set<Lhs>& lhs,
 		const Rhs&... rhs)
 	{

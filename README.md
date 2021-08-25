@@ -41,11 +41,11 @@ Current memory extensions for polymorphic allocators
 
 ### To Do
 Current todo list sorted by priority
-1. [ ] Service Locator | Dependency Injector
-2. [ ] Dispatcher
-3. [ ] Thread Pool
-4. [ ] Many (TEP)
-5. [ ] Small Vector
-5. [ ] Adjacency List + Graph Algorithms
+1. [ ] Small Vector
+2. [ ] Many (TEP)
+3. [ ] Event Dispatcher | Event Queue | Callback Dispatcher | Callback Queue
+4. [ ] Service Locator | Dependency Injector
+5. [ ] Thread Pool
+6. [ ] Adjacency List + Graph Algorithms
 
  

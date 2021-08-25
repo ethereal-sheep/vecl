@@ -16,7 +16,7 @@
 namespace vecl
 {
 	/**
-	 * @brief Sparse Map is a contiguous container that contains key-value
+	 * @brief A Sparse Map is a contiguous container that contains key-value
 	 * pairs with strictly integral keys.
 	 *
 	 * Provides constant time insert, remove, and lookup, while providing
@@ -35,17 +35,17 @@ namespace vecl
 	 * with the set. The container, however, does provide suitable functions
 	 * to implement certain functions e.g. sparse_map::sort.
 	 *
-	 * @tparam Id_t Unsigned integer type.
+	 * @tparam Id Unsigned integer type.
 	 * @tparam T Type of element.
 	 */
 	template <
-		typename Id_t,
+		typename Id,
 		typename T>
 		class sparse_map
 	{
 		static_assert(
-			std::is_unsigned_v<Id_t>,
-			"Id_t must be an unsigned integral type!");
+			std::is_unsigned_v<Id>,
+			"Id must be an unsigned integral type!");
 
 
 
@@ -209,19 +209,19 @@ namespace vecl
 		/**
 		 * @note TYPE TRAITS
 		 */
-		using id_type = Id_t;
-		using key_type = Id_t;
+		using id_type = Id;
+		using key_type = Id;
 		using mapped_type = T;
-		using value_type = std::pair<Id_t, T>;
-		using reference = std::pair<const Id_t&, T&>;
-		using const_reference = std::pair<const Id_t&, const T&>;
+		using value_type = std::pair<Id, T>;
+		using reference = std::pair<const Id&, T&>;
+		using const_reference = std::pair<const Id&, const T&>;
 		using size_type = size_t;
 		using difference_type = ptrdiff_t;
 
-		using dense_array = std::pmr::vector<Id_t>;
+		using dense_array = std::pmr::vector<Id>;
 		using mapped_array = std::pmr::vector<T>;
-		using sparse_array = std::pmr::vector<Id_t>;
-		using allocator_type = typename dense_array::allocator_type;
+		using sparse_array = std::pmr::vector<Id>;
+		using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
 
 		using iterator = sparse_map_iterator<
 			typename dense_array::iterator,
@@ -256,7 +256,7 @@ namespace vecl
 		  * global pmr resource via get_default_resource().
 		  */
 		explicit sparse_map(
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _mapped(mr), _sparse(VECL_SPARSE_SIZE, 0, mr)
 		{
@@ -271,7 +271,7 @@ namespace vecl
 		 */
 		explicit sparse_map(
 			size_type capacity,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _mapped(mr), _sparse(capacity, 0, mr)
 		{
@@ -292,7 +292,7 @@ namespace vecl
 		sparse_map(
 			It first, It last,
 			size_type capacity = VECL_SPARSE_SIZE,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			_dense(mr), _mapped(mr), _sparse(capacity, 0, mr)
 		{
@@ -311,7 +311,7 @@ namespace vecl
 		sparse_map(
 			std::initializer_list<value_type> il,
 			size_type capacity = VECL_SPARSE_SIZE,
-			std::pmr::memory_resource* mr = std::pmr::get_default_resource()
+			allocator_type mr = std::pmr::get_default_resource()
 		) :
 			sparse_map(il.begin(), il.end(), capacity, mr)
 		{
@@ -332,7 +332,7 @@ namespace vecl
 		 */
 		sparse_map(
 			const sparse_map& other,
-			std::pmr::memory_resource* mr
+			allocator_type mr
 		) :
 			_dense(other._dense, mr),
 			_mapped(other._mapped, mr),
@@ -343,7 +343,7 @@ namespace vecl
 		/**
 		 * @brief Default Move Constructor. Constructs container with
 		 * the contents of other using move-semantics. After the move, other
-		 * is guaranteed to be empty().
+		 * is guaranteed to be empty.
 		 *
 		 * @param other Universal-Ref to other.
 		 */
@@ -360,7 +360,7 @@ namespace vecl
 		 */
 		sparse_map(
 			sparse_map&& other,
-			std::pmr::memory_resource* mr
+			allocator_type mr
 		) :
 			_dense(std::move(other._dense), mr),
 			_mapped(std::move(other._mapped), mr),
@@ -875,7 +875,7 @@ namespace vecl
 		template <typename Pred>
 		void sort(Pred&& pred)
 		{
-			std::vector<Id_t> copy(size());
+			std::vector<Id> copy(size());
 			std::iota(copy.begin(), copy.end(), 0);
 			std::sort(copy.begin(), copy.end(),
 				[&pred, this](const auto l, const auto r)
@@ -883,7 +883,7 @@ namespace vecl
 					return pred(_dense[l], _dense[r]);
 				});
 
-			for (Id_t i = 0, len = static_cast<Id_t>(size()); i < len; ++i)
+			for (Id i = 0, len = static_cast<Id>(size()); i < len; ++i)
 			{
 				auto curr = i;
 				auto next = copy[curr];
@@ -1138,7 +1138,7 @@ namespace vecl
 		}
 
 	private:
-		void _swap(Id_t rhs, Id_t lhs)
+		void _swap(Id rhs, Id lhs)
 		{
 			auto from = _sparse[lhs];
 			auto to = _sparse[rhs];
