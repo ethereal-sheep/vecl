@@ -30,8 +30,17 @@ of stl containers should also be a goal in the forseeable future.
 
 ### Containers
 Current container support in the library.
+
 - Sparse Set
 - Sparse Map
+- View Objects (simple, reverse, skip, drop)
+
+### Events
+Current event dispatcher support in the library
+
+- Broadcast
+- Publisher
+
 
 ### Memory
 Current memory extensions for polymorphic allocators
@@ -41,11 +50,59 @@ Current memory extensions for polymorphic allocators
 
 ### To Do
 Current todo list sorted by priority
-1. [ ] Small Vector
-2. [ ] Many (TEP)
-3. [ ] Event Dispatcher | Event Queue | Callback Dispatcher | Callback Queue
-4. [ ] Service Locator | Dependency Injector
-5. [ ] Thread Pool
-6. [ ] Adjacency List + Graph Algorithms
+1. [X] Ranges/Views
+   - [X] View from any range (std::vector)
+   - [X] Reverse View
+   - [X] Skip View
+   - [X] Drop View
+   - [ ] Value View
+2. [X] Event Dispatcher
+   - [ ] Extend broadcast for deferred dispatch
+   - [ ] Extend publisher for deferred dispatch
+3. [ ] Small Vector
+4. [ ] Many (TEP)
+5. [ ] Service Locator | Dependency Injector
+6. [ ] Thread Pool
+7. [ ] Adjacency List + Graph Algorithms
 
+
+ # Documentation
+Documentation regarding `vecl` containers can be found in the [docs](docs) 
+folder. You may also use the following links to quickly access the required
+documentation:
+
+1. [Sparse Set](docs/sparse_set.md)
+2. [Sparse Map](docs/sparse_map.md)
+3. [View Objects](docs/view.md)
+4. [Broadcast](docs/broadcast.md)
+5. [Publisher](docs/publisher.md)
+6. [Memory](docs/memory.md)
+
+ # Tests
+Unit tests in `vecl` uses [googletest](https://github.com/google/googletest) 
+library by google. You can build the tests by:
+
+1. Cloning the repository.
+
+    ```bash
+   git clone https://github.com/ethereal-sheep/vecl.git
+    ```
+2. Changing directory to the repository folder.
+
+    ```bash
+   cd vecl
+    ```
+3. Create a build directory and execute CMake:
+
+    ```bash
+    mkdir ./build
+    cd ./build
+    cmake ..
+    ```
+ # License
+ Copyright© 2021 Cantius Chew. The library is licensed under the 
+ [MIT License](LICENSE). 
  
+ You can do whatever you want with the library. Just include the license when 
+ you release your software, and don't take legal action with me if your stuff
+ breaks.
