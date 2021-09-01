@@ -48,6 +48,10 @@ The default capacity of the set is provided by the macro `VECL_SPARSE_SIZE`,
 with a value of 1024. Redefinition of the macro allows the user to change the
 default capacity.
 
+```c++
+#define VECL_SPARSE_SIZE 256 // set default sparse size to 256
+```
+
 The rest of the set's operations closely resembles that of `std::unordered_set`.
 
 ```c++
@@ -85,7 +89,7 @@ what is done by `std::unordered_set`.
 There are three cases that may occur:
 
 | No. | Case | Description |
-|-----|------|-------------|
+|:---:|------|-------------|
 |1| Key is emplaced successfully | Boolean is true and returning iterator points to newly created key. |
 |2| Key exists in set | Boolean is false and returning iterator points to existing key. |
 |3| Key value > max() | Boolean is false and returning iterator == end(). |
@@ -160,8 +164,7 @@ auto print = [](auto& set)
 
 std::cout << "Before: ";
 print(a);
-// default ascending
-a.sort();
+a.sort(); // default ascending
 std::cout << "After:  ";
 print(a);
 
@@ -183,8 +186,110 @@ After:  5 4 3 2 1
 ```
 
 ## Set Operations
-[ ]: todo
+A common use case when using sets are performing set operations union, 
+intersection and equality. The `stl` does provide some algorithms to perform
+such operations, but `vecl::sparse_set` provides them explicitly as member
+functions.
 
+### Equality
+There are two functions in the set that perform equality checking. The common
+`operator==()`, and the `set_equal` function. The latter performs existence
+checking only, while the former performs ordering check as well.
+
+`operator!=()` is available as well.
+
+```c++
+vecl::sparse_set<int> a{5,3,4,1,2};
+vecl::sparse_set<int> b{2,4,1,3,5};
+vecl::sparse_set<int> c{2,4,1,3,5};
+
+assert(a.set_equal(b)); // only existence check
+assert(vecl::set_equal(a,b,c)); // global set_equal operation for multiple sets
+
+assert(a != b)); // existence + order check
+assert(b == c));
+```
+
+### Union
+Like the `stl`, the function to perform the union operation between two sets
+is called `merge`.
+
+Might overload `operator&()` and `operator&=()` for union operators in the 
+future.
+```c++
+vecl::sparse_set<int> a{1,2,3,4,5};
+vecl::sparse_set<int> b{6,7,8,9,0};
+
+// print lambda
+auto print = [](auto& set)
+{
+    for(auto i : set)
+        std::cout << i << " ";
+    std::cout << "\n";
+}
+
+std::cout << "a: ";
+print(a);
+std::cout << "b: ";
+print(b);
+
+a.merge(b); // a = a u b, merge b into a
+std::cout << "\na: ";
+print(a);
+```
+Output:
+```
+a: 1 2 3 4 5
+b: 6 7 8 9 0
+
+a: 1 2 3 4 5 6 7 8 9 0
+```
+
+### Intersect
+The `stl` contains an algorithm called `std::set_intersection` but its usage
+is slightly different as it requires two sorted ranges as inputs. The set 
+provides the `intersect` function which is slightly more similar to the 
+conventional mathematical operation.
+
+Might overload `operator|()` and `operator|=()` for intersect operators in the 
+future.
+```c++
+vecl::sparse_set<int> a{1,2,3,4,5};
+vecl::sparse_set<int> b{1,2,3,9,0};
+
+// print lambda
+auto print = [](auto& set)
+{
+    for(auto i : set)
+        std::cout << i << " ";
+    std::cout << "\n";
+}
+
+std::cout << "a: ";
+print(a);
+std::cout << "b: ";
+print(b);
+
+a.intersect(b); // a = a n b, removes any key in a not contained in b
+std::cout << "\na: ";
+print(a);
+```
+Output:
+```
+a: 1 2 3 4 5
+b: 1 2 3 9 0
+
+a: 1 2 3
+```
 
 # Further Reading
-[ ]: todo
+For further insight on sparse sets, the following resources are great for
+understanding the internals of the sparse sets and usages.
+
+- GeeksForGeeks
+    - https://www.geeksforgeeks.org/sparse-set/ (Understanding sparse set internals)
+- EnTT
+    - https://github.com/skypjack/entt (ECS made with sparse sets)
+    - https://skypjack.github.io/2019-03-07-ecs-baf-part-2/ (Blog on ECS and sparse set usage by the creator of EnTT)
+
+
