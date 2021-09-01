@@ -120,14 +120,3 @@ TEST(VIEWS, drop_view) {
 	}
 
 }
-TEST(VIEWS, chaining_views) {
-
-	vi a{ 1,2,3,4,5 };
-	auto b = vecl::reverse(vecl::reverse(a));
-
-	for (auto i : b)
-		std::cout << i << " ";
-
-	
-
-}
