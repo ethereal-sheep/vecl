@@ -14,7 +14,7 @@ TEST(SPARSE_MAP, size_constructor) {
 	ASSERT_EQ(a.max_size(), 1000);
 	ASSERT_EQ(a.max(), 999);
 }
-TEST(SPARSE_MAP, iterator_constructor) {
+TEST(SPARSE_MAP, range_constructor) {
 	std::unordered_map< uint32_t, std::string> a =
 	{
 		{1, "string"}, {2, "string"}, {3, "string"}

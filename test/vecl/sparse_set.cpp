@@ -25,6 +25,37 @@ TEST(SPARSE_SET, range_constructor) {
 		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
 
 }
+TEST(SPARSE_SET, capacity_range_constructor) {
+	std::vector<float> a;
+	int t = 50;
+	while (t--)
+		a.push_back(static_cast<float>(t));
+
+	vecl::sparse_set<size_t> b(a.begin(), a.end(), 100);
+
+	ASSERT_EQ(b.max_size(), 100);
+	ASSERT_EQ(b.size(), a.size());
+	for (auto i : a)
+		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
+
+}
+TEST(SPARSE_SET, il_constructor) {
+	vecl::sparse_set<size_t> b{ 1,2,3,4 };
+
+	ASSERT_TRUE(b.count(1));
+	ASSERT_TRUE(b.count(2));
+	ASSERT_TRUE(b.count(3));
+	ASSERT_TRUE(b.count(4));
+}
+TEST(SPARSE_SET, capacity_il_constructor) {
+	vecl::sparse_set<size_t> b({ 1,2,3,4 }, 10);
+
+	ASSERT_EQ(b.max_size(), 10);
+	ASSERT_TRUE(b.count(1));
+	ASSERT_TRUE(b.count(2));
+	ASSERT_TRUE(b.count(3));
+	ASSERT_TRUE(b.count(4));
+}
 
 TEST(SPARSE_SET, emplace_push_pop) {
 	vecl::sparse_set a;
@@ -201,6 +232,6 @@ TEST(SPARSE_SET, intersect) {
 	vecl::sparse_set b = { 6,7,8,2,5 };
 	vecl::sparse_set c = { 2,5 };
 
-	a.interect(b);
+	a.intersect(b);
 	ASSERT_EQ(a.set_equal(c), true);
 }

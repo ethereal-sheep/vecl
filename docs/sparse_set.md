@@ -72,13 +72,49 @@ a.erase(a.begin());
 a.clear();
 
 // capacity
-assert(a.empty() && !a.size());
+assert(a.empty());
+assert(a.size() == 0);
 
 // lookup
 a.insert(1);
 assert(a.contains(1));
 assert(a.count(1) == 1);
 ```
+
+We are also able to iterate over the set via iterators, either by a traditional
+for loop, or a range-based for loop.
+
+```c++
+vecl::sparse_set<int> a{1,2,3,4,5};
+
+auto for_print = [](auto& set)
+{
+    std::cout << "For Loop:   ";
+    for(auto it = set.begin(); it != set.end(); ++it)
+        std::cout << *it << " ";
+    std::cout << "\n";
+
+};
+
+auto range_print = [](auto& set)
+{
+    std::cout << "Range Loop: ";
+    for(auto i : set)
+        std::cout << i << " ";
+    std::cout << "\n";
+};
+
+for_print(a);
+range_print(a);
+
+```
+
+Output:
+```
+For loop:    1 2 3 4 5
+Range loop:  1 2 3 4 5
+```
+
 # Advance
 ## Insertion
 Due to the fixed capacity of sparse sets, we have to be careful when we insert
@@ -160,7 +196,7 @@ auto print = [](auto& set)
     for(auto i : set)
         std::cout << i << " ";
     std::cout << "\n";
-}
+};
 
 std::cout << "Before: ";
 print(a);
@@ -226,7 +262,7 @@ auto print = [](auto& set)
     for(auto i : set)
         std::cout << i << " ";
     std::cout << "\n";
-}
+};
 
 std::cout << "a: ";
 print(a);
@@ -263,7 +299,7 @@ auto print = [](auto& set)
     for(auto i : set)
         std::cout << i << " ";
     std::cout << "\n";
-}
+};
 
 std::cout << "a: ";
 print(a);
