@@ -708,7 +708,7 @@ namespace vecl
 		 * not contained in other.
 		 */
 		template<typename TOther>
-		void interect(const sparse_set<TOther>& other)
+		void intersect(const sparse_set<TOther>& other)
 		{
 			auto it = begin();
 			while (it != end())

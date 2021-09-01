@@ -71,7 +71,8 @@ namespace vecl
 
 	private:
 		using weak = std::weak_ptr<callback>;
-		using subscribers = std::pmr::unordered_map<uint64_t, std::pmr::vector<weak>>;
+		using subscribers = std::pmr::unordered_map<
+									uint64_t, std::pmr::vector<weak>>;
 
 		subscribers _msg_subs;
 		token _sentinel = 0;

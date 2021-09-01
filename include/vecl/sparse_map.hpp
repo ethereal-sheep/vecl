@@ -551,7 +551,7 @@ namespace vecl
 
 		/**
 		 * @brief Resizes the container. Resizing a non-empty container is
-		 *  defined if and only if the maximum key value in the set is strictly
+		 *  defined if and only if the maximum key value in the map is strictly
 		 * less than new_size. Otherwise, the operation is undefined.
 		 *
 		 * @todo Decide if we should throw an exception when resizing to a
@@ -589,9 +589,11 @@ namespace vecl
 		 * Returns an (iterator, outcome) pair.
 		 *
 		 * (1) Key is inserted successfully;
-		 * outcome is true and returning iterator points to newly created key.
+		 * outcome is true and returning iterator points to newly created
+		 * key-value pair.
 		 * (2) Key is contained in container;
-		 * outcome is false and returning iterator points to existing key.
+		 * outcome is false and returning iterator points to existing key-value
+		 * pair.
 		 * (3) Key value > max();
 		 * outcome is false and returning iterator == end().
 		 *
@@ -619,9 +621,11 @@ namespace vecl
 		 * Returns an (iterator, outcome) pair.
 		 *
 		 * (1) Key is inserted successfully;
-		 * outcome is true and returning iterator points to newly created key.
+		 * outcome is true and returning iterator points to newly created
+		 * key-value pair.
 		 * (2) Key is contained in container;
-		 * outcome is false and returning iterator points to existing key.
+		 * outcome is false and returning iterator points to existing key-value
+		 * pair.
 		 * (3) Key value > max();
 		 * outcome is false and returning iterator == end().
 		 *
