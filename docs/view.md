@@ -86,25 +86,6 @@ Output:
 1 2 4 5
 ```
 
-## Chaining
-Since view objects are considered range objects, we can chain them with each
-other to obtain different behaviours of iteration.
-
-
-```c++
-std::vector<int> v{1,2,3,4,5};
-
-auto view = vecl::reverse(vecl::drop(v, 3));
-
-for(auto i : view)
-    std::cout << i << " "; 
-```
-
-Output:
-```
-5 4 2 1
-```
-
 # Further Reading
 For further insight on view objects and how to make your own, the following 
 resources are great for understanding what view objects are and the benefits of
