@@ -31,7 +31,7 @@ vecl::sparse_map<int, std::string> c{ {1, "one"}, {2, "two"}, {3, "three"} };
 // ...and their corresponding assignment operators
 ```
 
-However, we also have to account for the fixed capacty issue. Therefore, the
+However, we also have to account for the fixed capacity issue. Therefore, the
 map comes with capacity overloads for all its constructors as well.
 
 ```c++

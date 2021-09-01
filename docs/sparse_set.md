@@ -30,7 +30,7 @@ vecl::sparse_set<int> c{1,2,3,4};
 // ...and their corresponding assignment operators
 ```
 
-However, we also have to account for the fixed capacty issue. Therefore, the
+However, we also have to account for the fixed capacity issue. Therefore, the
 set comes with capacity overloads for all its constructors as well.
 
 ```c++
@@ -223,8 +223,8 @@ After:  5 4 3 2 1
 
 ## Set Operations
 A common use case when using sets are performing set operations union, 
-intersection and equality. The `stl` does provide some algorithms to perform
-such operations, but `vecl::sparse_set` provides them explicitly as member
+intersection and equality. While the `stl` does provide some algorithms to 
+perform such operations, `vecl::sparse_set` provides them explicitly as member
 functions.
 
 ### Equality
@@ -232,7 +232,7 @@ There are two functions in the set that perform equality checking. The common
 `operator==()`, and the `set_equal` function. The latter performs existence
 checking only, while the former performs ordering check as well.
 
-`operator!=()` is available as well.
+The `operator!=()` operator overload is available as well.
 
 ```c++
 vecl::sparse_set<int> a{5,3,4,1,2};

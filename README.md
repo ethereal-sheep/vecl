@@ -57,6 +57,10 @@ Current todo list sorted by priority:
    - [X] Reverse View
    - [X] Skip View
    - [X] Drop View
+   - [ ] Terminate View
+   - [ ] Transform View
+   - [ ] Splicing views
+   - [ ] Key View
    - [ ] Value View
 2. [X] Event Dispatcher
    - [ ] Extend broadcast for deferred dispatch
@@ -70,6 +74,11 @@ Current todo list sorted by priority:
 6. [ ] Service Locator | Dependency Injector
 7. [ ] Thread Pool
 8. [ ] Adjacency List + Graph Algorithms
+9. [ ] Category Theory
+   - [ ] Monoid
+   - [ ] Functor
+   - [ ] Applicative
+   - [ ] Monad
 
 
  # Documentation
