@@ -12,8 +12,8 @@
 namespace vecl
 {
 	/**
-	 * @brief Simple hook for messages. Publisher class can be used as
-	 * is with messages inheriting from simple_message.
+	 * @brief Simple hook for messages. Publisher class can be used as-is with 
+	 * messages inheriting from simple_message.
 	 */
 	struct simple_message
 	{
@@ -24,8 +24,8 @@ namespace vecl
 	 * @brief A Publisher is a smart event-handler that models a
 	 * publisher-subscriber design pattern.
 	 *
-	 * The container allows functions to be subscribed to an event,
-	 * and will invoke them when the event is published.
+	 * The container allows functions to be subscribed to an message,
+	 * and will invoke them when the message is published.
 	 * 
 	 * A token is given to the subscriber per subscription,
 	 * which handles the lifetime of the subscription within the container.
