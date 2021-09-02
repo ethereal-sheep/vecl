@@ -182,6 +182,7 @@ namespace vecl
 		{
 			return _bytes_allocated;
 		}
+		
 		/**
 		 * @return Total bytes deallocated during lifetime.
 		 */

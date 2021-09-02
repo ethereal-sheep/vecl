@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <vecl/view.hpp>
 #include <vector>
+#include <iostream>
 
 using vi = std::vector<int>;
 
@@ -119,4 +120,13 @@ TEST(VIEWS, drop_view) {
 		++x;
 	}
 
+}
+TEST(VIEWS, chain_view) {
+
+	vi a{ 1,2,3,4,5 };
+	auto b = vecl::reverse(a);
+	auto c = vecl::skip(b, [](auto i) { return i == 3; });
+
+	for (auto i : c)
+		std::cout << i << " ";
 }
