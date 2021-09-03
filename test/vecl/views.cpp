@@ -127,6 +127,4 @@ TEST(VIEWS, chain_view) {
 	auto b = vecl::reverse(a);
 	auto c = vecl::skip(b, [](auto i) { return i == 3; });
 
-	for (auto i : c)
-		std::cout << i << " ";
 }
