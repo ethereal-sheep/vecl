@@ -53,7 +53,8 @@ namespace vecl
 		explicit publisher(
 			allocator_type mr = std::pmr::get_default_resource()
 		) : 
-			_subs(mr)
+			_subs(mr),
+			_queue(mr)
 		{
 		}
 
@@ -75,7 +76,8 @@ namespace vecl
 			const publisher& other,
 			allocator_type mr
 		) :
-			_sub(other._sub, mr)
+			_sub(other._sub, mr),
+			_queue(other._queue, mr)
 		{
 		}
 
@@ -100,7 +102,8 @@ namespace vecl
 			publisher&& other,
 			allocator_type mr
 		) : 
-			_subs(std::move(other._subs), mr)
+			_subs(std::move(other._subs), mr), 
+			_queue(std::move(other._queue), mr)
 		{
 		}
 
@@ -137,19 +140,25 @@ namespace vecl
 		 */
 
 		/**
-		* @return Number of subscriptions to Message.
-		*/
+		 * @return Number of subscriptions to Message.
+		 * 
+		 * @warning Only an approximation as there may be dead listeners
+		 * who have not been cleaned up.
+		 */
 		template<typename Message>
-		VECL_NODISCARD auto size() const VECL_NOEXCEPT
+		VECL_NODISCARD size_t size() const VECL_NOEXCEPT
 		{
 			if(!_subs.count(typeid(Message).hash_code())) return 0;
 
-			return _subs[typeid(Message).hash_code()].size();
+			return _subs.at(typeid(Message).hash_code()).size();
 		}
 
 		/**
-		* @return True if there are no subscriptions to Message.
-		*/
+		 * @return True if there are no subscriptions to Message.
+		 * 
+		 * @warning Only an approximation as there may be dead listeners
+		 * who have not been cleaned up.
+		 */
 		template<typename Message>
 		VECL_NODISCARD bool empty() const VECL_NOEXCEPT
 		{
@@ -206,6 +215,39 @@ namespace vecl
 			_subs[typeid(Message).hash_code()].trigger(msg);
 		}
 
+
+		/**
+		 * @brief Schedules a message for a later blast.
+		 *
+		 * @tparam Message Type of message (should inherit from Base)
+		 * @tparam Args Variadic argument list
+		 *
+		 * @param args Variadic arguments to be passed to Message constructor
+		 */
+		template<typename Message, typename... Args>
+		void schedule(Args&&... args)
+		{
+			static_assert(
+				std::is_base_of_v<Base, Message>,
+				"Must inherit from Base");
+			
+			_queue.emplace_back(
+			std::pair<uint64_t, std::shared_ptr<Base>>(
+				typeid(Message).hash_code(), 
+				std::make_shared<Message>(std::forward<Args>(args)...)));
+		}
+
+		/**
+		 * @brief Blasts all scheduled messages.
+		 *
+		 */
+		void blast()
+		{
+			for(auto [hash, msg] : _queue) 
+				_subs[hash].trigger(*msg);
+			_queue.clear();
+		}
+
 		/**
 		 * @note NON-MEMBER FUNCTIONS
 		 */
@@ -222,8 +264,10 @@ namespace vecl
 
 	private:
 		using subscribers = std::pmr::unordered_map<uint64_t, broadcast<callback>>;
+		using message_queue = std::pmr::vector<std::pair<uint64_t, std::shared_ptr<Base>>>;
 		
 		subscribers _subs;
+		message_queue _queue;
 	};
 }
 

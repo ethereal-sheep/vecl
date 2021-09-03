@@ -52,11 +52,13 @@ auto token2 = bc.listen(f2);
     auto token3 = bc.listen(f3);
 } // token3 goes out of scope
 
+// token1 is destroyed
+token1.reset();
+
 bc.trigger();
 ```
 Output:
 ```c++
-Hello from 1!
 Hello from 2!
 ```
 

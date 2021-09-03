@@ -248,32 +248,123 @@ TEST(DISPATCHER, publisher_cleanup) {
 		++ans;
 	};
 
+	{
+		{auto token = p.subscribe<test>(test_fn);
+		auto token2 = p.subscribe<test>(test_fn); }
+		auto token3 = p.subscribe<vecl::simple_message>(test_fn);
 
-	{auto token = p.subscribe<test>(test_fn);
-	auto token2 = p.subscribe<test>(test_fn); }
+		auto token4 = p.subscribe<test>(goo);
+		{auto token5 = p.subscribe<test>(goo);
+		auto token6 = p.subscribe<vecl::simple_message>(goo); }
+
+		obj o;
+		auto binded = std::bind(&obj::foo, &o, std::placeholders::_1);
+		{auto token7 = p.subscribe<test>(binded); }
+		auto token8 = p.subscribe<test>(&obj::foo, &o);
+		{auto token9 = p.subscribe<vecl::simple_message>(binded); }
+
+		global_a = 0;
+		p.publish<test>();
+
+		ASSERT_EQ(ans, 0);
+		ASSERT_EQ(o.a, 1);
+		ASSERT_EQ(global_a, 1);
+
+
+		p.publish<vecl::simple_message>();
+		ASSERT_EQ(ans, 1);
+		ASSERT_EQ(o.a, 1);
+		ASSERT_EQ(global_a, 1);
+	}
+
+	p.publish<test>();
+	p.publish<vecl::simple_message>();
+
+}
+
+
+TEST(DISPATCHER, publisher_delay) {
+	vecl::publisher p;
+
+	int ans = 0;
+	auto test_fn = [&ans](const vecl::simple_message&) {
+		++ans;
+	};
+
+
+	auto token = p.subscribe<test>(test_fn);
+	auto token2 = p.subscribe<test>(test_fn);
 	auto token3 = p.subscribe<vecl::simple_message>(test_fn);
 
 	auto token4 = p.subscribe<test>(goo);
-	{auto token5 = p.subscribe<test>(goo);
-	auto token6 = p.subscribe<vecl::simple_message>(goo); }
+	auto token5 = p.subscribe<test>(goo);
+	auto token6 = p.subscribe<vecl::simple_message>(goo);
 
 	obj o;
 	auto binded = std::bind(&obj::foo, &o, std::placeholders::_1);
-	{auto token7 = p.subscribe<test>(binded); }
+	auto token7 = p.subscribe<test>(binded);
 	auto token8 = p.subscribe<test>(&obj::foo, &o);
-	{auto token9 = p.subscribe<vecl::simple_message>(binded); }
+	auto token9 = p.subscribe<vecl::simple_message>(binded);
 
 	global_a = 0;
-	p.publish<test>();
+	p.schedule<test>();
 
 	ASSERT_EQ(ans, 0);
-	ASSERT_EQ(o.a, 1);
-	ASSERT_EQ(global_a, 1);
+	ASSERT_EQ(o.a, 0);
+	ASSERT_EQ(global_a, 0);
 
 
-	p.publish<vecl::simple_message>();
+	p.schedule<vecl::simple_message>();
+	ASSERT_EQ(ans, 0);
+	ASSERT_EQ(o.a, 0);
+	ASSERT_EQ(global_a, 0);
+
+	p.blast();
+
+	ASSERT_EQ(ans, 3);
+	ASSERT_EQ(o.a, 3);
+	ASSERT_EQ(global_a, 3);
+
+
+}
+TEST(DISPATCHER, token_call) {
+
+	int ans = 0;
+	auto test_fn = [&ans](const vecl::simple_message&) {
+		++ans;
+	};
+
+	vecl::publisher p;
+
+	auto token = p.subscribe<test>(test_fn);
+
+	ASSERT_EQ(ans, 0);
+	(*token)(test());
+
 	ASSERT_EQ(ans, 1);
-	ASSERT_EQ(o.a, 1);
-	ASSERT_EQ(global_a, 1);
+}
+TEST(DISPATCHER, token_reset) {
+
+	int ans = 0;
+	auto test_fn = [&ans](const vecl::simple_message&) {
+		++ans;
+	};
+
+	vecl::publisher p;
+
+	auto token = p.subscribe<test>(test_fn);
+
+	ASSERT_EQ(ans, 0);
+
+	p.publish<test>();
+
+	ASSERT_EQ(ans, 1);
+
+	token.reset();
+	p.publish<test>();
+
+	ASSERT_EQ(ans, 1);
+
+
 
 }

@@ -24,7 +24,7 @@ The goals of the project are to:
 
 The library also uses the standard library for underlying container support 
 like `std::vector` and `std::unordered_map` but creating `vecl` implementations
-of stl containers should also be a goal in the forseeable future.
+of `stl` containers should also be a goal in the forseeable future.
 
 ## Supported Structures
 
@@ -57,14 +57,9 @@ Current todo list sorted by priority:
    - [X] Reverse View
    - [X] Skip View
    - [X] Drop View
-   - [ ] Terminate View
-   - [ ] Transform View
-   - [ ] Splicing views
-   - [ ] Key View
-   - [ ] Value View
+   - [ ] Change views to use piping
 2. [X] Event Dispatcher
-   - [ ] Extend broadcast for deferred dispatch
-   - [ ] Extend publisher for deferred dispatch
+   - [X] Extend publisher for deferred dispatch
 3. [X] Sparse Set
    - [ ] Extend set operations for:
       - [ ] & and &= operator for union
@@ -74,11 +69,6 @@ Current todo list sorted by priority:
 6. [ ] Service Locator | Dependency Injector
 7. [ ] Thread Pool
 8. [ ] Adjacency List + Graph Algorithms
-9. [ ] Category Theory
-   - [ ] Monoid
-   - [ ] Functor
-   - [ ] Applicative
-   - [ ] Monad
 
 
  # Documentation

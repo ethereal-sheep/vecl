@@ -35,7 +35,6 @@ namespace vecl
 		using token = std::shared_ptr<callback>;
 		using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
 
-
 		/**
 		 * @note MEMBER FUNCTIONS
 		 */
@@ -129,7 +128,10 @@ namespace vecl
 		 */
 
 		/**
-		 * @return Number of listeners.
+		 * @return Number of listeners. 
+		 * 
+		 * @warning Size is only an approximation as there may be dead listeners
+		 * who have not been cleaned up.
 		 */
 		VECL_NODISCARD auto size() const VECL_NOEXCEPT
 		{
@@ -138,6 +140,9 @@ namespace vecl
 
 		/**
 		 * @brief Checks if the container is empty.
+		 * 
+		 * @warning Only an approximation as there may be dead listeners
+		 * who have not been cleaned up.
 		 */
 		VECL_NODISCARD bool empty() const VECL_NOEXCEPT
 		{

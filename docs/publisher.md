@@ -50,6 +50,39 @@ Output:
 I am a message!
 ```
 
+## Scheduling Messages
+We can also schedule messages and blast them all later on in the runtime. Any
+new subscribers that tune in after a message is scheduled will also receive
+the message.
+```c++
+// first subscriber
+auto token = myPublisher.subscribe<SimpleMessage>(print_simple_message);
+
+// first scheduled message
+myPublisher.schedule<SimpleMessage>("I am a scheduled message!");
+
+/* ..some other stuff */
+
+// second scheduled message
+myPublisher.schedule<SimpleMessage>("I am a second scheduled message!");
+
+/* ..some other stuff */
+
+// second subscriber
+auto token2 = myPublisher.subscribe<SimpleMessage>(print_simple_message);
+
+// blast message
+myPublisher.blast();
+```
+Output:
+```c++
+I am a scheduled message!
+I am a scheduled message!
+I am a second scheduled message!
+I am a second scheduled message!
+```
+
+
 ## Token
 A token is given to the subscriber per subscription via the `subscribe` member 
 function.
@@ -69,11 +102,13 @@ auto token2 = myPublisher.subscribe<SimpleMessage>(f);
     auto token3 = myPublisher.subscribe<SimpleMessage>(f);
 } // token3 goes out of scope
 
+// token1 is destroyed
+token1.reset();
+
 myPublisher.publish<SimpleMessage>("I am a message!");
 ```
 Output:
 ```c++
-I am a message!
 I am a message!
 ```
 
