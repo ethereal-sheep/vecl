@@ -103,8 +103,8 @@ library by google. You can build the tests by:
 3. Creating a build directory and executing CMake:
 
     ```bash
-    mkdir ./build
-    cd ./build
+    mkdir build
+    cd build
     cmake ..
     ```
  # License
