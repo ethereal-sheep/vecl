@@ -1,5 +1,5 @@
 # Very Extensive Container Library
-`vecl` is a header-only container Library written with **modern C++**. 
+`vecl` is a header-only container library written with **modern C++**. 
 It provides an extensive number of multi-purpose containers/constructs with 
 many use cases. 
 While "extensive" may be an overstatement, the idea is to motivate myself to 
@@ -52,23 +52,20 @@ Current memory extensions for polymorphic allocators:
 ### To Do
 Current todo list sorted by priority:
 
-1. [X] Ranges/Views
-   - [X] View from any range (std::vector)
-   - [X] Reverse View
-   - [X] Skip View
-   - [X] Drop View
-   - [ ] Change views to use piping
-2. [X] Event Dispatcher
-   - [X] Extend publisher for deferred dispatch
-3. [X] Sparse Set
+1. [ ] Deprecate Ranges/Views and replace with Pipes
+2. [X] Sparse Set
    - [ ] Extend set operations for:
       - [ ] & and &= operator for union
       - [ ] | and |= operator for intersection
-4. [ ] Small Vector
-5. [ ] Many (TEP)
-6. [ ] Service Locator | Dependency Injector
-7. [ ] Thread Pool
-8. [ ] Adjacency List + Graph Algorithms
+3. [ ] Lock-Free
+   - [ ] SPSC Lock-Free Queue
+   - [ ] SPSC Lock-Free Stack
+   - [ ] MPMC Lock-Free Queue
+   - [ ] MPMC Lock-Free Stack
+4. [ ] Many (TEP)
+5. [ ] Service Locator | Dependency Injector
+6. [ ] Thread Pool
+7. [ ] Adjacency List + Graph Algorithms
 
 
  # Documentation

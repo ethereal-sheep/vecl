@@ -76,7 +76,7 @@ namespace vecl
 			const publisher& other,
 			allocator_type mr
 		) :
-			_sub(other._sub, mr),
+			_subs(other._subs, mr),
 			_queue(other._queue, mr)
 		{
 		}

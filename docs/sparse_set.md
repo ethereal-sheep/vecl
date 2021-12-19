@@ -242,8 +242,8 @@ vecl::sparse_set<int> c{2,4,1,3,5};
 assert(a.set_equal(b)); // only existence check
 assert(vecl::set_equal(a,b,c)); // global set_equal operation for multiple sets
 
-assert(a != b)); // existence + order check
-assert(b == c));
+assert(a != b); // existence + order check
+assert(b == c);
 ```
 
 ### Union

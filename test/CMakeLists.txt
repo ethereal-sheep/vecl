@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(vecl)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -39,3 +39,4 @@ BASIC_TEST(_sparse_map vecl/sparse_map.cpp)
 BASIC_TEST(_views vecl/views.cpp)
 BASIC_TEST(_broadcast vecl/broadcast.cpp)
 BASIC_TEST(_publisher vecl/publisher.cpp)
+BASIC_TEST(_pipe vecl/pipe.cpp)
