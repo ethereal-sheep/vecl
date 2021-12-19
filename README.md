@@ -33,7 +33,7 @@ Current container support in the library:
 
 - Sparse Set
 - Sparse Map
-- View Objects (simple, reverse, skip, drop)
+- Pipes
 
 ### Events
 Current event dispatcher support in the library:
@@ -49,10 +49,12 @@ Current memory extensions for polymorphic allocators:
 - Malloc
 - Aligned Alloc
 
+
 ### To Do
 Current todo list sorted by priority:
 
-1. [ ] Deprecate Ranges/Views and replace with Pipes
+1. [X] Deprecate Ranges/Views and replace with Pipes
+   - [ ] Rethink pipes usage
 2. [X] Sparse Set
    - [ ] Extend set operations for:
       - [ ] & and &= operator for union
@@ -75,7 +77,7 @@ documentation:
 
 1. [Sparse Set](docs/sparse_set.md)
 2. [Sparse Map](docs/sparse_map.md)
-3. [View Objects](docs/view.md)
+3. [Pipes](docs/pipes.md)
 4. [Broadcast](docs/broadcast.md)
 5. [Publisher](docs/publisher.md)
 6. [Memory](docs/memory.md)
