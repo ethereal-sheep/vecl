@@ -68,8 +68,7 @@ namespace vecl
 		broadcast(
 			const broadcast& other,
 			allocator_type mr
-		) :
-			_listeners(other._listeners, mr)
+		) :	_listeners(other._listeners, mr)
 		{
 		}
 

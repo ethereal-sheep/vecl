@@ -1,7 +1,8 @@
-#ifndef PIPES_CONCEPTS_HPP
-#define PIPES_CONCEPTS_HPP
+#ifndef VECL_CONCEPTS_HPP
+#define VECL_CONCEPTS_HPP
 
 #include <concepts>
+#include "type_traits.hpp"
 
 namespace vecl
 {
@@ -14,6 +15,12 @@ namespace vecl
 	concept back_insertable = requires(C & c, V && v) {
 		c.push_back(std::forward<V>(v));
 	};
+
+	template <class F, class... Args >
+	concept non_void_invocable = 
+		std::regular_invocable<F, Args...> &&
+		!std::is_same<void, std::invoke_result_t<F, Args...>>::value;
+	
 }
 
 #endif

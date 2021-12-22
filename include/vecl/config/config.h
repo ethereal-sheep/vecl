@@ -9,6 +9,14 @@
 #define VECL_NODISCARD [[nodiscard]]
 #endif
 
+#ifndef VECL_LIKELY
+#define VECL_LIKELY [[likely]]
+#endif
+
+#ifndef VECL_UNLIKELY
+#define VECL_UNLIKELY [[unlikely]]
+#endif
+
 #ifdef VECL_DISABLE_ASSERT
 #undef VECL_ASSERT
 #define VECL_ASSERT(...) (void(0))

@@ -288,7 +288,7 @@ namespace vecl
 		 * @param mr Pointer to a pmr resource. Default gets the default
 		 * global pmr resource via get_default_resource().
 		 */
-		template <typename It>
+		template <std::input_iterator It>
 		sparse_map(
 			It first, It last,
 			size_type capacity = VECL_SPARSE_SIZE,

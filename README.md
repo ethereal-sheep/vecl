@@ -41,14 +41,12 @@ Current event dispatcher support in the library:
 - Broadcast
 - Publisher
 
-
 ### Memory
 Current memory extensions for polymorphic allocators:
 
 - Debug (single and multi-threaded)
 - Malloc
 - Aligned Alloc
-
 
 ### To Do
 Current todo list sorted by priority:
@@ -59,6 +57,11 @@ Current todo list sorted by priority:
    - [ ] Extend set operations for:
       - [ ] & and &= operator for union
       - [ ] | and |= operator for intersection
+3. [ ] Cache-Friendly DS
+   - [ ] Small Vector
+   - [ ] Small Set
+   - [ ] Small Map
+   - [ ] SBO for existing DS
 3. [ ] Lock-Free
    - [ ] SPSC Lock-Free Queue
    - [ ] SPSC Lock-Free Stack
