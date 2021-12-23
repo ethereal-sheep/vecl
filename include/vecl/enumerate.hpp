@@ -145,7 +145,6 @@ namespace vecl
 		/**
 		 * @note FRIENDS
 		 */
-
 		/**
 		 * @brief Enumerates over a range from 0 to end. If end < 0, the
 		 * enumeration goes in the -1 direction.

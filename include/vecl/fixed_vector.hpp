@@ -7,7 +7,7 @@
 namespace vecl
 {
 	/**
-	 * @brief A Fixed vector is an array with vector-like interface. 
+	 * @brief A Fixed Vector is an array with vector-like interface. 
 	 * 
 	 * Since the buffer is always stored on stack, we can expect much faster
 	 * operations with a vecl::fixed_vector as compared to a std::vector.
