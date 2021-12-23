@@ -51,7 +51,7 @@ TEST(MEMORY_DEBUG, reg_callback) {
 			"name",
 			vecl::get_default_memory_debug_callback());
 
-		auto p = a.allocate(10, 8);
+		[[maybe_unused]]auto p = a.allocate(10, 8);
 	}
 	// double delete
 	{
@@ -168,7 +168,7 @@ TEST(MEMORY_DEBUG, mt_callback) {
 			"name",
 			vecl::get_default_memory_debug_callback());
 
-		auto p = a.allocate(10, 8);
+		[[maybe_unused]] auto p = a.allocate(10, 8);
 	}
 	// double delete
 	{

@@ -694,3 +694,39 @@ TEST(FIXED_VECTOR, erase_remove) {
 	erase_remove(4, 264);
 }
 
+TEST(FIXED_VECTOR, swap) {
+
+
+	auto equal = [](auto& a, auto& b) {
+		if (a.size() != b.size()) return false;
+
+		for (auto i = 0; i < a.size(); ++i)
+			if (a[i] != b[i])
+				return false;
+		return true;
+	};
+
+	auto test_swap = [&](auto& il1, auto& il2) {
+
+		vecl::fixed_vector<test, 16> a1{ il1.begin(), il1.end() };
+		vecl::fixed_vector<test, 16> a2{ il2.begin(), il2.end() };
+		std::vector<test> b1{ il1.begin(), il1.end() };
+		std::vector<test> b2{ il2.begin(), il2.end() };
+
+
+		std::swap(a1, a2);
+
+		ASSERT_TRUE(equal(a1, b2));
+		ASSERT_TRUE(equal(a2, b1));
+	};
+
+	auto il1 = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
+	auto il2 = { test("1"), test("1"), test("2"), test("3"), test("5"), test("8") };
+	auto il3 = { test("2"), test("3"), test("5"), test("7"), test("11"), test("13") };
+
+	test_swap(il1, il2);
+	test_swap(il2, il3);
+	test_swap(il3, il1);
+
+}
+

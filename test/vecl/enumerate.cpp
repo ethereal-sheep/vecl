@@ -86,7 +86,6 @@ TEST(ENUMERATE, start_end_simple_xform) {
 		auto en = vecl::enumerate(start, end, lambda);
 		for (auto i : en)
 			ASSERT_EQ(i, lambda(c++));
-
 	};
 
 	auto times_two = [](int i)
@@ -158,7 +157,36 @@ TEST(ENUMERATE, start_end_test_intellisense) {
 		return std::make_pair(i * 2.f, i / 2.f);
 	};
 
-	auto a = std::function<std::pair<int,int>(int)>(split);
+	auto a = std::function<std::pair<int, int>(int)>(split);
 
 	auto en = vecl::enumerate(10, 20, split);
+}
+
+TEST(ENUMERATE, start_end_dead_function) {
+
+	int c = 5;
+	auto en = vecl::enumerate(10);
+	{
+		int a = c;
+		auto dead = [a](int i)
+		{
+			return i + a;
+		};
+
+		en = vecl::enumerate(10, dead);
+	}
+
+	int a = c;
+	auto alive = [a](int i)
+	{
+		return i + a;
+	};
+
+	c = 0;
+
+	for (auto i : en)
+	{
+		auto x = alive(c++);
+		ASSERT_EQ(i, x);
+	}
 }

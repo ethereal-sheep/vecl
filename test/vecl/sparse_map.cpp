@@ -312,3 +312,27 @@ TEST(SPARSE_MAP, sort) {
 	ASSERT_EQ(a, b);
 }
 
+TEST(SPARSE_MAP, swap) {
+
+	sparse a =
+	{
+		{1, "1"}, {2, "2"}, {3, "3"}
+	};
+	sparse b =
+	{
+		{3, "3"}, {1, "1"}, {2, "2"},
+	};
+
+	auto c = a;
+	auto d = b;
+
+	ASSERT_NE(c, b);
+	ASSERT_NE(d, a);
+
+	std::swap(a, b);
+
+	ASSERT_EQ(c, b);
+	ASSERT_EQ(d, a);
+}
+
+

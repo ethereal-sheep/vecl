@@ -38,12 +38,9 @@ namespace vecl
 	 * @tparam Id Unsigned integer type.
 	 */
 	template<
-		typename Id = uint32_t>
+		std::unsigned_integral Id = uint32_t>
 		class sparse_set
 	{
-		static_assert(
-			std::is_unsigned_v<Id>,
-			"Id must be an unsigned integral type!");
 
 	public:
 		/**
@@ -219,18 +216,6 @@ namespace vecl
 				push_back(i);
 		}
 
-		/**
-		 * @brief Swaps the contents of two sparse sets. The swap operation
-		 * of two sparse_sets with different memory_resource is undefined.
-		 */
-		void swap(sparse_set& x)
-		{
-			if (&x != this)
-			{
-				std::swap(_dense, x._dense);
-				std::swap(_sparse, x._sparse);
-			}
-		}
 
 		/**
 		 * @return Copy of allocator_type object used by the container.
@@ -623,6 +608,19 @@ namespace vecl
 				}
 			}
 		}
+		
+		/**
+		 * @brief Swaps the contents of two sparse sets. The swap operation
+		 * of two sparse_sets with different memory_resource is undefined.
+		 */
+		void swap(sparse_set& x)
+		{
+			if (&x != this)
+			{
+				std::swap(_dense, x._dense);
+				std::swap(_sparse, x._sparse);
+			}
+		}
 
 		/**
 		 * @note LOOKUP
@@ -731,7 +729,8 @@ namespace vecl
 		  */
 		friend bool operator==(
 			const sparse_set& lhs,
-			const sparse_set& rhs)
+			const sparse_set& rhs
+		)
 		{
 			return lhs._dense == rhs._dense;
 		}
@@ -741,7 +740,8 @@ namespace vecl
 		 */
 		friend bool operator!=(
 			const sparse_set& lhs,
-			const sparse_set& rhs)
+			const sparse_set& rhs
+		)
 		{
 			return !(lhs == rhs);
 		}
@@ -750,7 +750,7 @@ namespace vecl
 		 * @brief Swaps the contents of two sparse sets. The swap operation
 		 * of two sets with different memory_resource is undefined.
 		 */
-		friend void swap(sparse_set& lhs, sparse_set& rhs) VECL_NOEXCEPT
+		friend inline void swap(sparse_set& lhs, sparse_set& rhs) VECL_NOEXCEPT
 		{
 			lhs.swap(rhs);
 		}
@@ -778,12 +778,25 @@ namespace vecl
 	template<typename Lhs, typename... Rhs>
 	inline bool set_equal(
 		const sparse_set<Lhs>& lhs,
-		const Rhs&... rhs)
+		const Rhs&... rhs
+	) noexcept
 	{
 		return (lhs.set_equal(rhs) && ...);
 	}
 
 
+}
+
+namespace std
+{
+	template<typename Id>
+	inline void swap(
+		vecl::sparse_set<Id>& lhs, 
+		vecl::sparse_set<Id>& rhs
+	) noexcept
+	{
+		lhs.swap(rhs);
+	}
 }
 
 #endif

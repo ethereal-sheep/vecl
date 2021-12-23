@@ -2,17 +2,28 @@
 #define VECL_ENUMERATE_HPP
 
 #include "config/config.h"
-
 #include "concepts.hpp"
 
 namespace vecl
 {
+	/**
+	 * @brief An Enumerable is a helper object that allows
+	 * for easy enumeration over a range through a range-based for-loop.
+	 * 
+	 * The object can only be created with the helper function enumerate().
+	 *
+	 * @tparam T Integral type to enumerate over
+	 * @tparam R Return type of the enumeration
+	 */
 	template<std::integral T, typename R>
 	class enumerable
 	{
 		T _start, _end;
 		std::function<R(T)> _func;
 
+		/**
+		 * @brief Iterator object.
+		 */
 		class _iterator
 		{
 			friend enumerable;
@@ -21,6 +32,10 @@ namespace vecl
 			const int _dir;
 			const std::function<R(T)> _func;
 
+			/**
+			 * @brief Private Constructor.
+			 * Copy and move constructions and assignments are defaulted.
+			 */
 			constexpr _iterator(T it, int dir, const std::function<R(T)>& func)
 				: _it{ it }, _dir{ dir }, _func{ func } {}
 		public:
@@ -81,27 +96,33 @@ namespace vecl
 			}
 
 			/** @brief Standard boiler plate for iterators. */
-			VECL_NODISCARD constexpr friend _iterator operator+(const _iterator& it, int n)
+			VECL_NODISCARD constexpr 
+			friend _iterator operator+(const _iterator& it, int n)
 			{
 				_iterator ret = it;
 				return ret += n;
 			}
 
 			/** @brief Standard boiler plate for iterators. */
-			VECL_NODISCARD constexpr friend _iterator operator-(const _iterator& it, int n)
+			VECL_NODISCARD 
+			constexpr friend _iterator operator-(const _iterator& it, int n)
 			{
 				_iterator ret = it;
 				return ret -= n;
 			}
 
 			/** @brief Standard boiler plate for iterators. */
-			VECL_NODISCARD constexpr bool operator==(const _iterator& rhs) const
+			VECL_NODISCARD 
+			constexpr bool operator==(const _iterator& rhs) const
 			{
 				return rhs._it == _it;
 			}
 
 			/** @brief Standard boiler plate for iterators. */
-			VECL_NODISCARD constexpr std::partial_ordering operator<=>(const _iterator& it) const
+			VECL_NODISCARD 
+			constexpr std::partial_ordering operator<=>(
+				const _iterator& it
+			) const
 			{
 				if(_dir != it._dir) return std::partial_ordering::unordered;
 				if (_dir < 0) return it._it <=> _it;
@@ -110,34 +131,99 @@ namespace vecl
 
 		};
 
+		/**
+		 * @brief Private Constructor. 
+		 * Copy and move constructions and assignments are defaulted.
+		 *
+		 * @param start Start of range
+		 * @param end End of range
+		 * @param func Transform function called on each element in range
+		 */
 		enumerable(T start, T end, std::function<R(T)> func)
-			: _start{ start }, _end{ end }, _func{ func } {}
+			: _start{ start }, _end{ end }, _func{ std::move(func) } {}
 
+		/**
+		 * @note FRIENDS
+		 */
 
+		/**
+		 * @brief Enumerates over a range from 0 to end. If end < 0, the
+		 * enumeration goes in the -1 direction.
+		 *
+		 * @tparam T Integral type to enumerate over
+		 *
+		 * @param end End of range
+		 *
+		 * @return Enumerable object
+		 */
 		template<std::integral T>
-		friend constexpr auto enumerate(T end)->enumerable<T, T>;
+		friend constexpr auto enumerate(T end)
+			->enumerable<T, T>;
 
+		/**
+		 * @brief Enumerates over a range from start to end. If end < start, 
+		 * the enumeration goes in the -1 direction.
+		 *
+		 * @tparam T Integral type to enumerate over
+		 *
+		 * @param start Start of range
+		 * @param end End of range
+		 *
+		 * @return Enumerable object
+		 */
 		template<std::integral T>
-		friend constexpr auto enumerate(T start, T end)->enumerable<T, T>;
+		friend constexpr auto enumerate(T start, T end)
+			->enumerable<T, T>;
 
+		/**
+		 * @brief Enumerates over a range from 0 to end and tranforms each 
+		 * element in the range with a corresponding function.
+		 *
+		 * If end < 0, the enumeration goes in the -1 direction.
+		 *
+		 * @tparam T Integral type to enumerate over
+		 * @tparam Func Non-void invocable type
+		 *
+		 * @param start Start of range
+		 * @param end End of range
+		 * @param func Transform function called on each element in range
+		 *
+		 * @return Enumerable object
+		 */
 		template<std::integral T, typename Func>
 		requires non_void_invocable<Func, T>
-		friend constexpr auto enumerate(T end, Func func)->enumerable<T, std::invoke_result_t<Func, T>>;
-		
+		friend constexpr auto enumerate(T end, Func func)
+			->enumerable<T, std::invoke_result_t<Func, T>>;
+
+		/**
+		 * @brief Enumerates over a range from 0 to end and tranforms each 
+		 * element in the range with a corresponding function.
+		 *
+		 * If end < 0, the enumeration goes in the -1 direction.
+		 *
+		 * @tparam T Integral type to enumerate over
+		 * @tparam Func Non-void invocable type
+		 *
+		 * @param start Start of range
+		 * @param end End of range
+		 * @param func Transform function called on each element in range
+		 *
+		 * @return Enumerable object
+		 */
 		template<std::integral T, typename Func>
 		requires non_void_invocable<Func, T>
-		friend constexpr auto enumerate(T start, T end, Func func)->enumerable<T, std::invoke_result_t<Func, T>>;
+		friend constexpr auto enumerate(T start, T end, Func func)
+			->enumerable<T, std::invoke_result_t<Func, T>>;
 
 
 	public:
-		using value_type = T;
-		using size_type = size_t;
-		using pointer = value_type*;
-		using const_pointer = const value_type*;
-
+		using value_type = R;
+		using pointer = const T*;
 		using iterator = _iterator;
 
-
+		/**
+		 * @note ITERATORS
+		 */
 		/**
 		 * @brief Standard Iterable Object boilerplate.
 		 * @return Iterator to beginning of range.
@@ -161,29 +247,37 @@ namespace vecl
 
 
 	template<std::integral T>
-	VECL_NODISCARD constexpr auto enumerate(T end) -> enumerable<T,T>
+	VECL_NODISCARD constexpr auto enumerate(T end) 
+		-> enumerable<T,T>
 	{
-		return enumerable<T,T>(0, end, [](T p) constexpr -> T { return p; });
+		return enumerable<T,T>(0, end, 
+			[](T p) constexpr -> T { return p; });
 	}
 
 	template<std::integral T>
-	VECL_NODISCARD constexpr auto enumerate(T start, T end) -> enumerable<T, T>
+	VECL_NODISCARD constexpr auto enumerate(T start, T end) 
+		-> enumerable<T, T>
 	{
-		return enumerable<T,T>(start, end, [](T p) constexpr -> T { return p; });
+		return enumerable<T,T>(start, end, 
+			[](T p) constexpr -> T { return p; });
 	}
 
 	template<std::integral T, typename Func>
 	requires non_void_invocable<Func, T>
-	VECL_NODISCARD constexpr auto enumerate(T end, Func func) -> enumerable<T, std::invoke_result_t<Func, T>>
+	VECL_NODISCARD constexpr auto enumerate(T end, Func func) 
+		-> enumerable<T, std::invoke_result_t<Func, T>>
 	{
-		return enumerable<T, std::invoke_result_t<Func, T>>(0, end, func);
+		using R = std::invoke_result_t<Func, T>;
+		return enumerable<T, R>(0, end, func);
 	}
 
 	template<std::integral T, typename Func>
 	requires non_void_invocable<Func, T>
-	VECL_NODISCARD constexpr auto enumerate(T start, T end, Func func) -> enumerable<T, std::invoke_result_t<Func, T>>
+	VECL_NODISCARD constexpr auto enumerate(T start, T end, Func func) 
+		-> enumerable<T, std::invoke_result_t<Func, T>>
 	{
-		return enumerable<T, std::invoke_result_t<Func, T>>(start, end, func);
+		using R = std::invoke_result_t<Func, T>;
+		return enumerable<T, R>(start, end, func);
 	}
 }
 
