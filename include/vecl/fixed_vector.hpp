@@ -738,6 +738,8 @@ namespace vecl
 		 * @param cit Const-iterator to insert before
 		 * @param from Iterator to start of range.
 		 * @param to Iterator to end of range.
+		 * 
+		 * @TODO fails if It is const T* and a reference in range
 		 */
 		template <std::input_iterator It>
 		constexpr iterator insert(const_iterator cit, It from, It to)
