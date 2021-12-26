@@ -7,6 +7,9 @@
 
 namespace vecl
 {
+
+
+
 	template<typename T, size_t N>
 	struct small_vector_buffer
 	{
@@ -18,9 +21,20 @@ namespace vecl
 
 
 	template <typename T>
-	class small_vector_i : public std::vector<T>
+	class small_vector_ref
 	{
 
+	};
+
+	template <typename SizeT>
+	class small_vector_base
+	{
+		small_vector_base();
+		small_vector_base(void* first, size_t size);
+
+		size_t capacity() const;
+		bool empty() const;
+		size_t size() const;
 	};
 
 	template<typename T, size_t N>

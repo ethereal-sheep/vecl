@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
+
 #include <vector>
 #include <unordered_set>
 #include <vecl/pipes.hpp>
-
+#include <gtest/gtest.h>
 using namespace vecl::pipes;
 
 

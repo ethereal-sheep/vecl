@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include <vecl/fixed_vector.hpp>
 
+#include <vecl/fixed_vector.hpp>
+#include <gtest/gtest.h>
 #include <array>
 
 struct test {
@@ -730,3 +730,15 @@ TEST(FIXED_VECTOR, swap) {
 
 }
 
+
+constexpr vecl::fixed_vector<char, 5> create_fixed() {
+	vecl::fixed_vector<char, 5> a;
+	a = { 0,1,2,3,4 };
+	return a;
+}
+
+TEST(FIXED_VECTOR, pointer_test) {
+
+	vecl::fixed_vector<int, 5> a;
+	ASSERT_EQ((void*)&a, (void*)a.begin());
+}

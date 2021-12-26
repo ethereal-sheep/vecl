@@ -3,6 +3,7 @@
 
 #include "config/config.h"
 #include "concepts.hpp"
+#include <functional> // function
 
 namespace vecl
 {

@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include <vecl/set_vector.hpp>
 
+#include <vecl/set_vector.hpp>
+#include <gtest/gtest.h>
 TEST(SET_VECTOR, constructor) {
 	vecl::set_vector<uint32_t> a;
 	ASSERT_EQ(a.size(), 0);

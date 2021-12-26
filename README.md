@@ -33,6 +33,7 @@ Current container support in the library:
 
 - Sparse Set
 - Sparse Map
+- Fixed Vector
 - Pipes
 
 ### Events
@@ -48,6 +49,9 @@ Current memory extensions for polymorphic allocators:
 - Malloc
 - Aligned Alloc
 
+### Extra
+- Enumerate
+
 ### To Do
 Current todo list sorted by priority:
 
@@ -58,6 +62,7 @@ Current todo list sorted by priority:
       - [ ] & and &= operator for union
       - [ ] | and |= operator for intersection
 3. [ ] Cache-Friendly DS
+   - [X] Fixed Vector
    - [ ] Small Vector
    - [ ] Small Set
    - [ ] Small Map
@@ -80,10 +85,12 @@ documentation:
 
 1. [Sparse Set](docs/sparse_set.md)
 2. [Sparse Map](docs/sparse_map.md)
-3. [Pipes](docs/pipes.md)
-4. [Broadcast](docs/broadcast.md)
-5. [Publisher](docs/publisher.md)
-6. [Memory](docs/memory.md)
+3. [Fixed Vector](docs/fixed_vector.md)
+4. [Pipes](docs/pipes.md)
+5. [Broadcast](docs/broadcast.md)
+6. [Publisher](docs/publisher.md)
+7. [Memory](docs/memory.md)
+8. [Enumerate](docs/enumerate.md)
 
 Internal code are also documented in a doxygen style, and can be used as a
 reference when writing code.

@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
+
 #include <vecl/sparse_map.hpp>
 #include <vecl/memory.hpp>
-
+#include <gtest/gtest.h>
 using sparse = vecl::sparse_map<uint32_t, std::string>;
 
 TEST(SPARSE_MAP, default_constructor) {

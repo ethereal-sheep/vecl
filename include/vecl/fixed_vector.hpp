@@ -2,10 +2,13 @@
 #define VECL_FIXED_VECTOR_H
 
 #include "config/config.h"
-#include <iterator>
+#include <iterator> // advance, distance
+#include <stdexcept> // length_error
+#include <memory> // uninitialized_move, uninitialized_copy 
 
 namespace vecl
 {
+
 	/**
 	 * @brief A Fixed Vector is an array with vector-like interface. 
 	 * 
@@ -19,12 +22,12 @@ namespace vecl
 	 * @tparam Strict false for no throw on overflow
 	 */
 	template<typename T, size_t N, bool Strict = true>
-	class fixed_vector
+	class fixed_vector 
 	{
 		/**
 		 * @brief Destroys the elements in a given range.
 		 */
-		void _destroy_range(T* s, T* e) VECL_NOEXCEPT
+		constexpr void _destroy_range(T* s, T* e) VECL_NOEXCEPT
 		{
 			while (s != e) (--e)->~value_type();
 		}
@@ -32,7 +35,7 @@ namespace vecl
 		/**
 		 * @return true if ref is in the range.
 		 */
-		bool _is_reference_in_range(const T* ref, const T* from, const T* to) const
+		constexpr bool _is_reference_in_range(const T* ref, const T* from, const T* to) const
 		{
 			std::less<> less;
 			return !less(ref, from) && less(ref, to);
@@ -41,7 +44,7 @@ namespace vecl
 		/**
 		 * @return true if ref is in the buffer.
 		 */
-		bool _is_reference_in_buffer(const T* ref) const
+		constexpr bool _is_reference_in_buffer(const T* ref) const
 		{
 			return _is_reference_in_range(ref, begin(), end());
 		}
@@ -49,7 +52,7 @@ namespace vecl
 		/**
 		 * @return true if range is in the buffer.
 		 */
-		bool _is_range_in_buffer(const T* from, const T* to) const
+		constexpr bool _is_range_in_buffer(const T* from, const T* to) const
 		{
 			std::less<> less;
 			return !less(from, begin()) && !less(to, from) &&
@@ -59,7 +62,7 @@ namespace vecl
 		/**
 		 * @return true if ref is not invalidated after a clear.
 		 */
-		bool _is_valid_after_clear(const T* ref) const
+		constexpr bool _is_valid_after_clear(const T* ref) const
 		{
 			return !_is_reference_in_buffer(ref);
 		}
@@ -67,7 +70,7 @@ namespace vecl
 		/**
 		 * @brief Asserts that a range is still valid after a clear.
 		 */
-		void _assert_valid_after_clear(const T* from, const T* to) const
+		constexpr void _assert_valid_after_clear(const T* from, const T* to) const
 		{
 			if (from == to)	return;
 			VECL_ASSERT(_is_valid_after_clear(from));
@@ -80,7 +83,7 @@ namespace vecl
 		 */
 		template <typename It>
 		requires !std::is_same<std::remove_const_t<It>, T*>::value
-		void _assert_valid_after_clear(It, It) const {}
+		constexpr void _assert_valid_after_clear(It, It) const {}
 
 	public:
 		/**
@@ -110,7 +113,7 @@ namespace vecl
 		 /**
 		 * @brief Destructor.
 		 */
-		~fixed_vector()
+		constexpr ~fixed_vector()
 		{
 			clear();
 		}
@@ -869,8 +872,8 @@ namespace vecl
 		 * 
 		 * @param cit Const-iterator position
 		 */
-		iterator erase(const_iterator cit) {
-
+		constexpr iterator erase(const_iterator cit)
+		{
 			VECL_ASSERT(
 				_is_reference_in_buffer(cit), 
 				"erase iterator is out of bounds"
@@ -890,8 +893,8 @@ namespace vecl
 		 * @param cfrom Const-iterator to start of range.
 		 * @param cto Const-iterator to end of range.
 		 */
-		iterator erase(const_iterator cfrom, const_iterator cto) {
-
+		constexpr iterator erase(const_iterator cfrom, const_iterator cto)
+		{
 			VECL_ASSERT(
 				_is_range_in_buffer(cfrom, cto), 
 				"erase iterator range is out of bounds"
@@ -983,7 +986,6 @@ namespace vecl
 				*this = std::move(temp);
 			}
 		}
-
 
 		/**
 		 * @brief Swaps the contents of two fixed_vectors.

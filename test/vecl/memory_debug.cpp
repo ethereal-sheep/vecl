@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
+
 #include <vecl/memory.hpp>
 #include <vecl/sparse_set.hpp>
-
+#include <gtest/gtest.h>
 TEST(MEMORY_DEBUG, test_vector_memory) {
 
 	{

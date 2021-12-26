@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include <vecl/sparse_set.hpp>
 
+#include <vecl/sparse_set.hpp>
+#include <gtest/gtest.h>
 TEST(SPARSE_SET, constructor) {
 	vecl::sparse_set<uint32_t> a(10);
 	vecl::sparse_set<uint64_t> b;

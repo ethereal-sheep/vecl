@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
+
 #include <vecl/enumerate.hpp>
+#include <gtest/gtest.h>
 
 void print(auto e)
 {

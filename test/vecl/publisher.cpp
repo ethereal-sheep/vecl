@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
+
 #include <vecl/publisher.hpp>
 #include <vecl/memory.hpp>
-
+#include <gtest/gtest.h>
 
 using namespace std;
 
