@@ -5,6 +5,10 @@
 #define VECL_NOEXCEPT noexcept
 #endif
 
+#ifndef VECL_NOEXCEPT_IF
+#define VECL_NOEXCEPT_IF(condition) noexcept(condition)
+#endif
+
 #ifndef VECL_NODISCARD
 #define VECL_NODISCARD [[nodiscard]]
 #endif

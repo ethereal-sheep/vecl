@@ -37,4 +37,4 @@ endfunction()
 
 
 
-BASIC_TEST(_fixed_vector_bench vecl/fixed_vector.cpp)
+BASIC_TEST(_vector_bench vecl/vector_bench.cpp)

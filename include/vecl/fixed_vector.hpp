@@ -9,6 +9,11 @@
 namespace vecl
 {
 
+	template<typename T, size_t N>
+	struct fixed_vector_buffer
+	{
+		alignas(T) char _buffer[std::max(sizeof(size_t), N * sizeof(T))];
+	};
 	/**
 	 * @brief A Fixed Vector is an array with vector-like interface. 
 	 * 
@@ -618,6 +623,8 @@ namespace vecl
 		 * 
 		 * @param cit Const-iterator to insert before
 		 * @param ele value_type by universal-reference
+		 * 
+		 * @TODO fails if universal_ref is reference to buffer
 		 */
 		constexpr iterator insert(const_iterator cit, value_type&& ele)
 		{

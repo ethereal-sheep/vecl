@@ -35,6 +35,7 @@ endfunction()
 
 BASIC_TEST(_sparse_set vecl/sparse_set.cpp)
 BASIC_TEST(_set_vector vecl/set_vector.cpp)
+BASIC_TEST(_small_vector vecl/small_vector.cpp)
 BASIC_TEST(_enumerate vecl/enumerate.cpp)
 BASIC_TEST(_fixed_vector vecl/fixed_vector.cpp)
 BASIC_TEST(_memory_debug vecl/memory_debug.cpp)
