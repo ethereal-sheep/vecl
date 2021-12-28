@@ -205,8 +205,9 @@ namespace vecl
 		 */
 		constexpr fixed_vector& operator=(fixed_vector&& other) VECL_NOEXCEPT
 		{
+			// if this is other we do nothing
 			if (&other == this) return *this;
-
+			// else we just clear and move all the stuff from other
 			clear();
 			std::uninitialized_move(other.begin(), other.end(), end());
 			_size = other.size();
@@ -236,6 +237,7 @@ namespace vecl
 			const value_type& value
 		)
 		{
+			// size check
 			if (ele_n > N) {
 				if constexpr (Strict)
 					throw std::length_error(
@@ -244,12 +246,16 @@ namespace vecl
 				else return;
 			}
 
+			// just overwrite over the current elements
 			std::fill_n(begin(), std::min(ele_n, size()), value);
+			// and either construct more elements at the end
 			if (ele_n > this->size())
 				std::uninitialized_fill_n(end(), ele_n - size(), value);
+			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
 				_destroy_range(begin() + ele_n, end());
 
+			// and update our size
 			_size = ele_n;
 		}
 
@@ -262,6 +268,7 @@ namespace vecl
 			size_type ele_n
 		)
 		{
+			// size check
 			if (ele_n > N) {
 				if constexpr (Strict)
 					throw std::length_error(
@@ -270,12 +277,16 @@ namespace vecl
 				else return;
 			}
 
+			// else just overwrite over the current elements
 			std::fill_n(begin(), std::min(ele_n, size()), value_type());
+			// and either construct more elements at the end
 			if (ele_n > this->size())
 				std::uninitialized_default_construct_n(end(), ele_n - size());
+			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
 				_destroy_range(begin() + ele_n, end());
 
+			// and update our size
 			_size = ele_n;
 		}
 
@@ -612,12 +623,13 @@ namespace vecl
 		constexpr void append(It from, It to)
 		{
 			size_type ele_n = std::distance(from, to);
+			// size check
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
 						);
-				else ele_n = spare();
+				else ele_n = spare(); // if not strict we just fill spare
 			}
 
 			std::uninitialized_copy(from, from + ele_n, end());
@@ -635,33 +647,32 @@ namespace vecl
 			const value_type& ele
 		)
 		{
+			// size check
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
 					);
-				else ele_n = spare();
+				else ele_n = spare(); // if not strict we just fill spare
 			}
 			std::uninitialized_fill_n(end(), ele_n, ele); 
 			_size += ele_n;
 		}
 
 		/**
-		 * @brief Fill append.
+		 * @brief Default Fill append.
 		 *
 		 * @param ele_n Number of elements
-		 * @param ele Element to fill by const-reference
 		 */
-		constexpr void append(
-			size_type ele_n
-		)
+		constexpr void append(size_type ele_n)
 		{
+			// size check
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
 					);
-				else ele_n = spare();
+				else ele_n = spare(); // if not strict we just fill spare
 			}
 			std::uninitialized_default_construct_n(end(), ele_n);
 			_size += ele_n;
@@ -687,8 +698,10 @@ namespace vecl
 		 */
 		constexpr iterator insert(const_iterator cit, value_type&& ele)
 		{
+			// we cast away the constness of our iterator since
+			// it is ours and this is a non-const function
 			iterator it = const_cast<iterator>(cit);
-
+			// if it == end(), we can just push back
 			if (it == end())
 			{
 				push_back(std::move(ele));
@@ -700,6 +713,7 @@ namespace vecl
 				"insertion iterator is out of bounds"
 				);
 
+			// size check
 			if (size() >= N)
 			{
 				if constexpr (Strict)
@@ -709,11 +723,14 @@ namespace vecl
 				else return it;
 			}
 
+			// we move construct the back element to the uninitialized memory
 			new ((void*)end()) T(std::move(back()));
+			// then we can move assign the rest of them one step to the right
 			std::move_backward(it, end() - 1, end());
 			++_size;
 
-			new ((void*)it) value_type(std::move(ele));
+			// finally, just assign the element in place
+			*it = std::move(ele);
 
 			return it;
 		}
@@ -742,8 +759,10 @@ namespace vecl
 			const value_type& ele
 		)
 		{
+			// we cast away the constness of our iterator since
+			// it is ours and this is a non-const function
 			iterator it = const_cast<iterator>(cit);
-
+			// if it == end(), we can append
 			if (it == end()) 
 			{ 
 				append(ele_n, ele);
@@ -755,42 +774,58 @@ namespace vecl
 				"insertion iterator is out of bounds"
 				);
 
+			// size check
 			if (ele_n > spare()) 
 			{
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
 						);
-				else ele_n = spare();
+				else ele_n = spare(); // if not strict we just fill spare
 			}
 
 
+			// save the end
 			value_type* old = end();
 			const value_type* ele_p = &ele;
 
+			// if overwriting elements is >= to inserting elements
 			if ((size_type)std::distance(it, end()) >= ele_n)
 			{
+				// we have the simple case of appending the last
+				// ele_n number of elements to the end
 				append(std::make_move_iterator(end() - ele_n),
 					std::make_move_iterator(end()));
-
+				// and moving the rest backwards accordingly
 				std::move_backward(it, old - ele_n, old);
 
+				// if our reference was in the range of the move
+				// we adjust the position of the ptr
 				if (it <= ele_p && ele_p < end())
 					std::advance(ele_p, ele_n);
-
+				// finally, just fill the elements in the new space
 				std::fill_n(it, ele_n, *ele_p);
 				return it;
 			}
 
+			// else we update the size here so we can use the new end()
 			_size += ele_n;
+			// overwrite n is the number of elements we need to move
 			size_t overwrite_n = std::distance(it, old);
+
+			// move last overwrite_n number of elements to uninitialized memory
+			// we know it is definitely uninitialized since 
+			// overwrite_n < ele_n
 			std::uninitialized_move(it, old, end() - overwrite_n);
 
+			// if our reference was in the range of the move
+			// we adjust the position of the ptr
 			if (it <= ele_p && ele_p < end())
 				std::advance(ele_p, ele_n);
 
+			// fill over existing elements
+			// over uninitialized fill unfilled space
 			std::fill_n(it, overwrite_n, *ele_p);
-
 			std::uninitialized_fill_n(old, ele_n - overwrite_n, *ele_p);
 
 			return it;
@@ -810,7 +845,10 @@ namespace vecl
 		template <std::input_iterator It>
 		constexpr iterator insert(const_iterator cit, It from, It to)
 		{
+			// we cast away the constness of our iterator since
+			// it is ours and this is a non-const function
 			iterator it = const_cast<iterator>(cit);
+			// if it == end(), we can append
 			if (it == end())
 			{
 				append(from, to);
@@ -823,43 +861,66 @@ namespace vecl
 				);
 
 			size_type ele_n = std::distance(from, to);
-			if (ele_n > spare())
+			// size check
+			if (ele_n > spare()) 
 			{
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
 						);
-				else ele_n = spare();
+				else ele_n = spare(); // if not strict we just fill spare
 			}
 
 
+			// save the end
 			value_type* old = end();
 			const value_type* ele_p = &*from;
-			size_t overwrite_n = (size_type)std::distance(it, old);
+			size_t overwrite_n = (size_t)std::distance(it, old);
 			
+			// if It is of type T*, we have to check if the it is a reference
+			// to the range
 			if constexpr (std::is_same<std::remove_const_t<It>, T*>::value)
 			{
+				// if it does, then we have to take extra care when copying
+				// since our range will be invalidated by the insert
 				if (_is_reference_in_range(it, from, to))
 				{
+					// if overwriting elements is >= to inserting elements
 					if (overwrite_n >= ele_n)
 					{
+						// we have the simple case of appending the last
+						// ele_n number of elements to the end
 						append(std::make_move_iterator(end() - ele_n),
 							std::make_move_iterator(end()));
 
+						// and moving the rest backwards accordingly
 						value_type* last = std::move_backward(
 							it, old - ele_n, old);
+						// then we piece wise copy from both parts of the range
+						// into the freed up space in the middle
 						value_type* mid = std::copy(&*from, it, it);
 						std::copy(last, &*to + ele_n, mid);
 						return it;
 					}
 
+					// else we update the size here so we can use the new end()
 					_size += ele_n;
 					value_type* last = end() - overwrite_n;
+					
+					// move last overwrite_n number of elements to unintialized 
+					// memory; we know it is definitely uninitialized since 
+					// overwrite_n < ele_n
 					std::uninitialized_move(it, old, end() - overwrite_n);
 
+					// piecewise copy and move from both parts of the range
+					// the freed up space in the middle is only partially 
+					// filled
 					value_type* curr = it;
 					for (; overwrite_n > 0; --overwrite_n, ++curr, ++from)
 					{
+						// if we reach the start of the freed space
+						// then the next element in range must be
+						// ele_n away
 						if (from == it)
 							std::advance(from, ele_n);
 						*curr = *from;
@@ -867,6 +928,9 @@ namespace vecl
 
 					for (; curr != last; ++curr, ++from)
 					{
+						// if we reach the start of the freed space
+						// then the next element in range must be
+						// ele_n away
 						if (from == it)
 							std::advance(from, ele_n);
 						new ((void*)curr) value_type(*from);
@@ -876,27 +940,41 @@ namespace vecl
 				}
 			}
 			
+			// if overwriting elements is >= to inserting elements
 			if (overwrite_n >= ele_n)
 			{
+				// we have the simple case of appending the last
+				// ele_n number of elements to the end
 				append(std::make_move_iterator(end() - ele_n),
 						std::make_move_iterator(end()));
 
-				// Copy the existing elements that get replaced.
+				// and moving the rest backwards accordingly
 				std::move_backward(it, old - ele_n, old);
-
+				// here we are guaranteed that the iterator is not in the range
+				// but we still have to check if the range will be affected
+				// by the move; if it is, adjust the positions of the range
 				if (it <= ele_p && ele_p < end())
 				{
 					std::advance(from, ele_n);
 					std::advance(to, ele_n);
 				} 
 
+				// then we can trivially copy them to the space in the
+				// middle
 				std::copy(from, to, it);
 				return it;
 			}
 
+			// else we update the size here so we can use the new end()
 			_size += ele_n;
+			// move last overwrite_n number of elements to uninitialized memory
+			// we know it is definitely uninitialized since 
+			// overwrite_n < ele_n
 			std::uninitialized_move(it, old, end() - overwrite_n);
 
+			// we do not need to check if our reference is in the range since
+			// by this point, it is impossible to be
+			// so we can just copy over the existing elements
 			for (
 				value_type* curr = it; 
 				overwrite_n > 0; 
@@ -904,6 +982,7 @@ namespace vecl
 				)
 				*curr = *from;
 
+			// and construct at the initialized memory
 			std::uninitialized_copy(from, to, old);
 
 			return it;
@@ -947,8 +1026,10 @@ namespace vecl
 				"erase iterator is out of bounds"
 				);
 
+			// we cast away the constness of our iterator since
+			// it is ours and this is a non-const function
 			iterator it = const_cast<iterator>(cit);
-
+			// just move one step to the left and pop the last
 			std::move(it + 1, end(), it);
 			pop_back();
 
@@ -968,9 +1049,11 @@ namespace vecl
 				"erase iterator range is out of bounds"
 				);
 
+			// we cast away the constness of our range iterators since
+			// they are ours and this is a non-const function
 			iterator from = const_cast<iterator>(cfrom);
 			iterator to = const_cast<iterator>(cto);
-
+			// just move left and destroy
 			iterator last = std::move(to, end(), from);
 
 			_destroy_range(last, end());
@@ -986,6 +1069,7 @@ namespace vecl
 		 */
 		constexpr void push_back(value_type&& ele)
 		{
+			// size check
 			if (size() >= N)
 			{
 				if constexpr (Strict)
@@ -1004,9 +1088,9 @@ namespace vecl
 		 * 
 		 * @param ele value_type by const-reference
 		 */
-		constexpr void push_back(const value_type& value)
+		constexpr void push_back(const value_type& ele)
 		{
-			push_back(value_type(value));
+			push_back(value_type(ele));
 		}
 
 		/**
@@ -1018,6 +1102,7 @@ namespace vecl
 		template<typename... Args>
 		constexpr reference emplace_back(Args&&... args)
 		{
+			// size check
 			if (size() >= N)
 			{
 				if constexpr (Strict)

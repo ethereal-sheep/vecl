@@ -961,14 +961,11 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Fill append.
+		 * @brief Default Fill append.
 		 *
 		 * @param ele_n Number of elements
-		 * @param ele Element to fill by const-reference
 		 */
-		constexpr void append(
-			size_type ele_n
-		)
+		constexpr void append(size_type ele_n)
 		{
 			// reserve for at least ele_n more elements
 			reserve(size() + ele_n);
@@ -1474,8 +1471,8 @@ namespace vecl
 	/**
 	 * @brief A Small Vector is a dynamic array with small buffer
 	 *  optimizations; i.e. for small sizes, the elements are stored
-	 *  on the stack instead of memory allocated from the free-store. Only
-	 *  when the stack buffer is full do we then 'spill' unto the heap.
+	 *  on the stack instead of the heap. Only
+	 *  when the stack buffer is full do we then 'spill' on to the heap.
 	 * 	 *
 	 * @tparam T Type of element.
 	 * @tparam N Size of the small buffer.
