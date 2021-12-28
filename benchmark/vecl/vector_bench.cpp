@@ -27,6 +27,15 @@ struct has_reserve<vecl::small_vector<T,N>> {
 template<typename T>
 static constexpr bool has_reserve_v = has_reserve<T>::value;
 
+template<std::unsigned_integral T>
+static void AddValues(benchmark::State& state) {
+
+    for (auto _ : state) {
+        (void)_;
+        T _size = 0;
+        _size += static_cast<T>(state.range(0));
+    }
+}
 
 template<typename ContainerT>
 static void ConstructWithSize(benchmark::State& state) {
@@ -34,6 +43,17 @@ static void ConstructWithSize(benchmark::State& state) {
     for (auto _ : state) {
         (void)_;
         ContainerT v(static_cast<size_t>(state.range(0)));
+        benchmark::DoNotOptimize(v.data());
+        benchmark::ClobberMemory();
+    }
+}
+
+template<typename ContainerT>
+static void ConstructWithSizeAndElement(benchmark::State& state) {
+
+    for (auto _ : state) {
+        (void)_;
+        ContainerT v(static_cast<size_t>(state.range(0)),1);
         benchmark::DoNotOptimize(v.data());
         benchmark::ClobberMemory();
     }
@@ -100,21 +120,45 @@ static void RandomSortedInsertion(benchmark::State& state) {
     }
 }
 
+
+template<typename ContainerT>
+static void RandomSizedSwap(benchmark::State& state) {
+    static std::mt19937 generator;
+    std::uniform_int_distribution<std::size_t> distribution{ 1, static_cast<size_t>(state.range(0)) };
+    for (auto _ : state) {
+        (void)_;
+        state.PauseTiming();
+        ContainerT v(distribution(generator));
+        ContainerT x(distribution(generator));
+        state.ResumeTiming();
+        benchmark::DoNotOptimize(v.data());
+        std::swap(v, x);
+        benchmark::ClobberMemory();
+    }
+}
+
+
 static constexpr int MAX_SIZE = 8 << 10;
+
+//BENCHMARK_TEMPLATE(AddValues, uint32_t)->RangeMultiplier(4)->Range(8, 8 << 20);
+//BENCHMARK_TEMPLATE(AddValues, size_t)->RangeMultiplier(4)->Range(8, 8 << 20);
 
 //
 //BENCHMARK_TEMPLATE(DefaultConstruct, std::vector<int>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(DefaultConstruct, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(DefaultConstruct, vecl::small_vector<int, 16>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
-BENCHMARK_TEMPLATE(ConstructWithSize, std::vector<int>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(ConstructWithSize, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(ConstructWithSize, vecl::small_vector<int, 16>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
+//BENCHMARK_TEMPLATE(ConstructWithSize, std::vector<int>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+//BENCHMARK_TEMPLATE(ConstructWithSize, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+//BENCHMARK_TEMPLATE(ConstructWithSize, vecl::small_vector<int, 16>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
 
 //BENCHMARK_TEMPLATE(ConstructWithSize, std::vector<std::string>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(ConstructWithSize, vecl::fixed_vector<std::string, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(ConstructWithSize, vecl::small_vector<std::string, 16>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-//BENCHMARK_TEMPLATE(ConstructWithSize, vecl::small_vector<std::string, 16, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
+// 
+//BENCHMARK_TEMPLATE(ConstructWithSizeAndElement, std::vector<int>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+//BENCHMARK_TEMPLATE(ConstructWithSizeAndElement, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+//BENCHMARK_TEMPLATE(ConstructWithSizeAndElement, vecl::small_vector<int, 16>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
 //
 //BENCHMARK_TEMPLATE(EmplaceBack, std::vector<int>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(EmplaceBack, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
@@ -136,6 +180,9 @@ BENCHMARK_TEMPLATE(ConstructWithSize, vecl::small_vector<int, 16>)->RangeMultipl
 //BENCHMARK_TEMPLATE(RandomSortedInsertion, vecl::small_vector<size_t, 8>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 //BENCHMARK_TEMPLATE(RandomSortedInsertion, vecl::small_vector<size_t, 8, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
+BENCHMARK_TEMPLATE(RandomSizedSwap, std::vector<int>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+BENCHMARK_TEMPLATE(RandomSizedSwap, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
+BENCHMARK_TEMPLATE(RandomSizedSwap, vecl::small_vector<int, 16>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
 
 // Run the benchmark
 BENCHMARK_MAIN();

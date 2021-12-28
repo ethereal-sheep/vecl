@@ -8,12 +8,6 @@
 
 namespace vecl
 {
-
-	template<typename T, size_t N>
-	struct fixed_vector_buffer
-	{
-		alignas(T) char _buffer[std::max(sizeof(size_t), N * sizeof(T))];
-	};
 	/**
 	 * @brief A Fixed Vector is an array with vector-like interface. 
 	 * 
@@ -34,13 +28,18 @@ namespace vecl
 		 */
 		constexpr void _destroy_range(T* s, T* e) VECL_NOEXCEPT
 		{
-			while (s != e) (--e)->~value_type();
+			if constexpr (!std::is_trivially_destructible<T>::value)
+				while (s != e) (--e)->~value_type();
 		}
 
 		/**
 		 * @return true if ref is in the range.
 		 */
-		constexpr bool _is_reference_in_range(const T* ref, const T* from, const T* to) const
+		constexpr bool _is_reference_in_range(
+			const T* ref, 
+			const T* from, 
+			const T* to
+		) const
 		{
 			std::less<> less;
 			return !less(ref, from) && less(ref, to);
@@ -130,11 +129,24 @@ namespace vecl
 		 * @param ele Element to fill by const-reference
 		 */
 		constexpr explicit fixed_vector(
-			size_t ele_n, 
-			const value_type& ele = value_type()
+			size_t ele_n,
+			const value_type& ele
 		)
 		{
 			append(ele_n, ele);
+		}
+
+		/**
+		 * @brief Explicit Fill Constructor.
+		 *
+		 * @param ele_n Number of elements
+		 * @param ele Element to fill by const-reference
+		 */
+		constexpr explicit fixed_vector(
+			size_t ele_n
+		)
+		{
+			append(ele_n);
 		}
 
 		/**
@@ -220,21 +232,47 @@ namespace vecl
 		 * @param value Element to fill by const-reference
 		 */
 		constexpr void assign(
-			size_type ele_n, 
-			const value_type& value = value_type()
+			size_type ele_n,
+			const value_type& value
 		)
 		{
 			if (ele_n > N) {
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
-						);
+					);
 				else return;
 			}
 
 			std::fill_n(begin(), std::min(ele_n, size()), value);
 			if (ele_n > this->size())
 				std::uninitialized_fill_n(end(), ele_n - size(), value);
+			else if (ele_n < this->size())
+				_destroy_range(begin() + ele_n, end());
+
+			_size = ele_n;
+		}
+
+		/**
+		 * @brief Fill assign.
+		 *
+		 * @param ele_n Number of elements
+		 */
+		constexpr void assign(
+			size_type ele_n
+		)
+		{
+			if (ele_n > N) {
+				if constexpr (Strict)
+					throw std::length_error(
+						"max_size exceeded in fixed_vector"
+					);
+				else return;
+			}
+
+			std::fill_n(begin(), std::min(ele_n, size()), value_type());
+			if (ele_n > this->size())
+				std::uninitialized_default_construct_n(end(), ele_n - size());
 			else if (ele_n < this->size())
 				_destroy_range(begin() + ele_n, end());
 
@@ -593,18 +631,39 @@ namespace vecl
 		 * @param ele Element to fill by const-reference
 		 */
 		constexpr void append(
-			size_type ele_n, 
-			const value_type& ele = value_type()
+			size_type ele_n,
+			const value_type& ele
 		)
 		{
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
 						"max_size exceeded in fixed_vector"
-						);
+					);
 				else ele_n = spare();
 			}
-			std::uninitialized_fill_n(end(), ele_n, ele);
+			std::uninitialized_fill_n(end(), ele_n, ele); 
+			_size += ele_n;
+		}
+
+		/**
+		 * @brief Fill append.
+		 *
+		 * @param ele_n Number of elements
+		 * @param ele Element to fill by const-reference
+		 */
+		constexpr void append(
+			size_type ele_n
+		)
+		{
+			if (ele_n > spare()) {
+				if constexpr (Strict)
+					throw std::length_error(
+						"max_size exceeded in fixed_vector"
+					);
+				else ele_n = spare();
+			}
+			std::uninitialized_default_construct_n(end(), ele_n);
 			_size += ele_n;
 		}
 
@@ -986,13 +1045,36 @@ namespace vecl
 		/**
 		 * @brief Swaps the contents of two fixed_vectors.
 		 */
-		constexpr void swap(fixed_vector& x)
+		constexpr void swap(fixed_vector& other)
 		{
-			if (&x != this)
+			if (&other == this) return;
+
+			// get the shared number of elements
+			size_type shared_n = std::min(size(), other.size());
+			// and swap only up to the shared number
+			for (size_type i = 0; i < shared_n; ++i)
+				std::swap(begin()[i], other.begin()[i]);
+
+			// then depending on which is vector is bigger
+			// we move the extra elements from the bigger vector to the
+			// smaller vector, then update the size and capacity
+			if (size() > other.size())
 			{
-				fixed_vector temp = std::move(x);
-				x = std::move(*this);
-				*this = std::move(temp);
+				size_type diff = size() - other.size();
+				std::uninitialized_move(begin() + shared_n, end(), other.end());
+				other._size += diff;
+
+				_destroy_range(begin() + shared_n, end());
+				_size = shared_n;
+			}
+			else if (size() < other.size())
+			{
+				size_type diff = other.size() - size();
+				std::uninitialized_move(other.begin() + shared_n, other.end(), end());
+				_size += diff;
+
+				_destroy_range(other.begin() + shared_n, other.end());
+				other._size = shared_n;
 			}
 		}
 

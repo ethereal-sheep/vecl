@@ -1092,10 +1092,3 @@ TEST(SMALL_VECTOR, swap) {
 	test_swap(il3, il1);
 
 }
-
-
-constexpr vecl::small_vector<char, 5> create_fixed() {
-	vecl::small_vector<char, 5> a;
-	a = { 0,1,2,3,4 };
-	return a;
-}
