@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
+
 #include <vecl/sparse_map.hpp>
 #include <vecl/memory.hpp>
-
+#include <gtest/gtest.h>
 using sparse = vecl::sparse_map<uint32_t, std::string>;
 
 TEST(SPARSE_MAP, default_constructor) {
@@ -311,4 +311,28 @@ TEST(SPARSE_MAP, sort) {
 	b.sort();
 	ASSERT_EQ(a, b);
 }
+
+TEST(SPARSE_MAP, swap) {
+
+	sparse a =
+	{
+		{1, "1"}, {2, "2"}, {3, "3"}
+	};
+	sparse b =
+	{
+		{3, "3"}, {1, "1"}, {2, "2"},
+	};
+
+	auto c = a;
+	auto d = b;
+
+	ASSERT_NE(c, b);
+	ASSERT_NE(d, a);
+
+	std::swap(a, b);
+
+	ASSERT_EQ(c, b);
+	ASSERT_EQ(d, a);
+}
+
 

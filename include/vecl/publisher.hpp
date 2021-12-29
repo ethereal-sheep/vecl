@@ -76,7 +76,7 @@ namespace vecl
 			const publisher& other,
 			allocator_type mr
 		) :
-			_sub(other._sub, mr),
+			_subs(other._subs, mr),
 			_queue(other._queue, mr)
 		{
 		}
@@ -183,13 +183,9 @@ namespace vecl
 		 * @return Subscription token(shared_ptr). When the token goes out
 		 * of scope, the subscription is revoked.
 		 */
-		template<typename Message, typename Func, typename... Args>
+		template<std::derived_from<Base> Message, typename Func, typename... Args>
 		VECL_NODISCARD auto subscribe(Func&& func, Args&&... args)
 		{
-			static_assert(
-				std::is_base_of_v<Base, Message>,
-				"Must inherit from Base");
-
 			return _subs[typeid(Message).hash_code()].listen(
 				std::bind(func, args..., std::placeholders::_1));
 
@@ -203,13 +199,9 @@ namespace vecl
 		 *
 		 * @param args Variadic arguments to be passed to Message constructor
 		 */
-		template<typename Message, typename... Args>
+		template<std::derived_from<Base> Message, typename... Args>
 		void publish(Args&&... args)
 		{
-			static_assert(
-				std::is_base_of_v<Base, Message>,
-				"Must inherit from Base");
-
 			Message msg{ std::forward<Args>(args)... };
 
 			_subs[typeid(Message).hash_code()].trigger(msg);
@@ -224,13 +216,9 @@ namespace vecl
 		 *
 		 * @param args Variadic arguments to be passed to Message constructor
 		 */
-		template<typename Message, typename... Args>
+		template<std::derived_from<Base> Message, typename... Args>
 		void schedule(Args&&... args)
 		{
-			static_assert(
-				std::is_base_of_v<Base, Message>,
-				"Must inherit from Base");
-			
 			_queue.emplace_back(
 			std::pair<uint64_t, std::shared_ptr<Base>>(
 				typeid(Message).hash_code(), 

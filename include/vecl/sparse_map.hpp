@@ -6,6 +6,7 @@
 #endif
 
 #include "config/config.h"
+#include "concepts.hpp"
 
 #include <memory_resource> // pmr::memory_resource
 #include <vector> // pmr::vector
@@ -39,22 +40,16 @@ namespace vecl
 	 * @tparam T Type of element.
 	 */
 	template <
-		typename Id,
+		std::unsigned_integral Id,
 		typename T>
 		class sparse_map
 	{
-		static_assert(
-			std::is_unsigned_v<Id>,
-			"Id must be an unsigned integral type!");
-
-
-
 		/**
 		 * @brief Iterator to adapt the container's separate dense
 		 * and mapped array iterators into a single iterator.
 		 */
 		template <typename It1, typename It2, typename TPair>
-		class sparse_map_iterator
+		class _sparse_map_iterator
 		{
 			friend class sparse_map;
 
@@ -62,20 +57,20 @@ namespace vecl
 			 * @brief Wraps a reference into an interface where it can
 			 * be called as a pointer.
 			 */
-			class reference_wrapper_ptr
+			class _reference_wrapper_ptr
 			{
 				TPair wrapped;
 			public:
-				reference_wrapper_ptr(TPair&& ref) : wrapped{ ref } {}
-				[[nodiscard]] TPair* operator->() { return &wrapped; }
-				[[nodiscard]] TPair operator*() { return wrapped; }
+				_reference_wrapper_ptr(TPair&& ref) : wrapped{ ref } {}
+				VECL_NODISCARD TPair* operator->() { return &wrapped; }
+				VECL_NODISCARD TPair operator*() { return wrapped; }
 			};
 
 
 			/**
 			 * @brief Private constructor.
 			 */
-			sparse_map_iterator(It1 i1, It2 i2) VECL_NOEXCEPT 
+			_sparse_map_iterator(It1 i1, It2 i2) VECL_NOEXCEPT 
 			: it1(i1), it2(i2) {}
 
 			It1 it1;
@@ -87,119 +82,125 @@ namespace vecl
 			 */
 			using difference_type = ptrdiff_t;
 			using value_type = TPair;
-			using pointer = reference_wrapper_ptr;
+			using pointer = _reference_wrapper_ptr;
 			using reference = TPair;
 			using iterator_category = std::random_access_iterator_tag;
 
-			sparse_map_iterator() = delete;
+			_sparse_map_iterator() = delete;
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator& operator=(const sparse_map_iterator& rhs)
+			_sparse_map_iterator& operator=(const _sparse_map_iterator& rhs)
 			{
 				return it1 = rhs.it1, it2 = rhs.it2, *this;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator& operator+=(size_t rhs)
+			_sparse_map_iterator& operator+=(size_t rhs)
 			{
 				return it1 += rhs, it2 += rhs, *this;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator& operator-=(size_t rhs)
+			_sparse_map_iterator& operator-=(size_t rhs)
 			{
 				return it1 -= rhs, it2 -= rhs, *this;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator& operator++()
+			_sparse_map_iterator& operator++()
 			{
 				return ++it1, ++it2, * this;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator operator++(int)
+			_sparse_map_iterator operator++(int)
 			{
-				sparse_map_iterator orig = *this;
+				_sparse_map_iterator orig = *this;
 				return ++(*this), orig;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator& operator--()
+			_sparse_map_iterator& operator--()
 			{
 				return --it1, --it2, * this;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			sparse_map_iterator operator--(int)
+			_sparse_map_iterator operator--(int)
 			{
-				sparse_map_iterator orig = *this;
+				_sparse_map_iterator orig = *this;
 				return operator--(), orig;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] sparse_map_iterator operator+(size_t rhs)
+			VECL_NODISCARD _sparse_map_iterator operator+(size_t rhs)
 			{
-				return sparse_map_iterator(it1 + rhs, it2 + rhs);
+				return _sparse_map_iterator(it1 + rhs, it2 + rhs);
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] sparse_map_iterator operator-(size_t rhs)
+			VECL_NODISCARD _sparse_map_iterator operator-(size_t rhs)
 			{
-				return sparse_map_iterator(it1 - rhs, it2 - rhs);
+				return _sparse_map_iterator(it1 - rhs, it2 - rhs);
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]]
-			difference_type operator-(const sparse_map_iterator& rhs)
+			VECL_NODISCARD
+			difference_type operator-(const _sparse_map_iterator& rhs)
 			{
 				return it1 - rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator==(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator==(const _sparse_map_iterator& rhs) const
 			{
 				return it1 == rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator!=(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator!=(const _sparse_map_iterator& rhs) const
 			{
 				return !(*this == rhs);
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator<(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator<(const _sparse_map_iterator& rhs) const
 			{
 				return it1 < rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator<=(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator<=(const _sparse_map_iterator& rhs) const
 			{
 				return it1 <= rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator>(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator>(const _sparse_map_iterator& rhs) const
 			{
 				return it1 > rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] bool operator>=(const sparse_map_iterator& rhs) const
+			VECL_NODISCARD 
+			bool operator>=(const _sparse_map_iterator& rhs) const
 			{
 				return it1 >= rhs.it1;
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] pointer operator->() const
+			VECL_NODISCARD pointer operator->() const
 			{
 				return pointer(std::make_pair(std::ref(*it1), std::ref(*it2)));
 			}
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			[[nodiscard]] reference operator*() const
+			VECL_NODISCARD reference operator*() const
 			{
 				return std::make_pair(std::ref(*it1), std::ref(*it2));
 			}
@@ -223,22 +224,22 @@ namespace vecl
 		using sparse_array = std::pmr::vector<Id>;
 		using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
 
-		using iterator = sparse_map_iterator<
+		using iterator = _sparse_map_iterator<
 			typename dense_array::iterator,
 			typename mapped_array::iterator,
 			reference>;
 
-		using const_iterator = sparse_map_iterator<
+		using const_iterator = _sparse_map_iterator<
 			typename dense_array::const_iterator,
 			typename mapped_array::const_iterator,
 			const_reference>;
 
-		using reverse_iterator = sparse_map_iterator<
+		using reverse_iterator = _sparse_map_iterator<
 			typename dense_array::reverse_iterator,
 			typename mapped_array::reverse_iterator,
 			reference>;
 
-		using const_reverse_iterator = sparse_map_iterator<
+		using const_reverse_iterator = _sparse_map_iterator<
 			typename dense_array::const_reverse_iterator,
 			typename mapped_array::const_reverse_iterator,
 			const_reference>;
@@ -288,7 +289,7 @@ namespace vecl
 		 * @param mr Pointer to a pmr resource. Default gets the default
 		 * global pmr resource via get_default_resource().
 		 */
-		template <typename It>
+		template <std::input_iterator It>
 		sparse_map(
 			It first, It last,
 			size_type capacity = VECL_SPARSE_SIZE,
@@ -396,20 +397,6 @@ namespace vecl
 			clear();
 			for (auto it = il.begin(), end = il.end(); it != end; ++it)
 				push_back(*it);
-		}
-
-		/**
-		 * @brief Swaps the contents of two sparse sets. The swap operation
-		 * of two sparse_sets with different memory_resource is undefined.
-		 */
-		void swap(sparse_map& x)
-		{
-			if (&x != this)
-			{
-				std::swap(_dense, x._dense);
-				std::swap(_mapped, x._mapped);
-				std::swap(_sparse, x._sparse);
-			}
 		}
 
 		/**
@@ -902,12 +889,23 @@ namespace vecl
 			}
 		}
 
+		/**
+		 * @brief Swaps the contents of two sparse sets. The swap operation
+		 * of two sparse_sets with different memory_resource is undefined.
+		 */
+		void swap(sparse_map& x)
+		{
+			if (&x != this)
+			{
+				std::swap(_dense, x._dense);
+				std::swap(_mapped, x._mapped);
+				std::swap(_sparse, x._sparse);
+			}
+		}
 
 		/**
 		 * @note ELEMENT ACCESS
 		 */
-
-
 		 /**
 		  * @brief Hashmap style subscript operator. Accesses specified
 		  * element at key by reference if it exists, else an insertion
@@ -1116,7 +1114,8 @@ namespace vecl
 		  */
 		friend bool operator==(
 			const sparse_map& lhs,
-			const sparse_map& rhs)
+			const sparse_map& rhs
+		)
 		{
 			return lhs._dense == rhs._dense && lhs._mapped == rhs._mapped;
 		}
@@ -1127,7 +1126,8 @@ namespace vecl
 		 */
 		friend bool operator!=(
 			const sparse_map& lhs,
-			const sparse_map& rhs)
+			const sparse_map& rhs
+		)
 		{
 			return !(lhs == rhs);
 		}
@@ -1136,7 +1136,7 @@ namespace vecl
 		 * @brief Swaps the contents of two sparse maps. The swap operation
 		 * of two maps with different memory_resource is undefined.
 		 */
-		friend void swap(sparse_map& lhs, sparse_map& rhs) VECL_NOEXCEPT
+		friend inline void swap(sparse_map& lhs, sparse_map& rhs) VECL_NOEXCEPT
 		{
 			lhs.swap(rhs);
 		}
@@ -1156,6 +1156,18 @@ namespace vecl
 		mapped_array _mapped;
 		sparse_array _sparse;
 	};
+}
+
+namespace std
+{
+	template<typename Id, typename T>
+	inline void swap(
+		vecl::sparse_map<Id, T>& lhs, 
+		vecl::sparse_map<Id, T>& rhs
+	) noexcept
+	{
+		lhs.swap(rhs);
+	}
 }
 
 #endif

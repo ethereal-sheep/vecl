@@ -1,18 +1,13 @@
 
-#include <vecl/sparse_set.hpp>
+#include <vecl/set_vector.hpp>
 #include <gtest/gtest.h>
-TEST(SPARSE_SET, constructor) {
-	vecl::sparse_set<uint32_t> a(10);
-	vecl::sparse_set<uint64_t> b;
-	vecl::sparse_set<size_t> c(30);
-
+TEST(SET_VECTOR, constructor) {
+	vecl::set_vector<uint32_t> a;
 	ASSERT_EQ(a.size(), 0);
-	ASSERT_EQ(a.max_size(), 10);
-	ASSERT_EQ(b.dense_size(), 0);
-	ASSERT_EQ(c.sparse_size(), 30);
 }
 
-TEST(SPARSE_SET, range_constructor) {
+/*
+TEST(SET_VECTOR, range_constructor) {
 	std::vector<float> a;
 	int t = 50;
 	while (t--)
@@ -25,21 +20,8 @@ TEST(SPARSE_SET, range_constructor) {
 		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
 
 }
-TEST(SPARSE_SET, capacity_range_constructor) {
-	std::vector<float> a;
-	int t = 50;
-	while (t--)
-		a.push_back(static_cast<float>(t));
 
-	vecl::sparse_set<size_t> b(a.begin(), a.end(), 100);
-
-	ASSERT_EQ(b.max_size(), 100);
-	ASSERT_EQ(b.size(), a.size());
-	for (auto i : a)
-		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
-
-}
-TEST(SPARSE_SET, il_constructor) {
+TEST(SET_VECTOR, il_constructor) {
 	vecl::sparse_set<size_t> b{ 1,2,3,4 };
 
 	ASSERT_TRUE(b.count(1));
@@ -47,17 +29,8 @@ TEST(SPARSE_SET, il_constructor) {
 	ASSERT_TRUE(b.count(3));
 	ASSERT_TRUE(b.count(4));
 }
-TEST(SPARSE_SET, capacity_il_constructor) {
-	vecl::sparse_set<size_t> b({ 1,2,3,4 }, 10);
 
-	ASSERT_EQ(b.max_size(), 10);
-	ASSERT_TRUE(b.count(1));
-	ASSERT_TRUE(b.count(2));
-	ASSERT_TRUE(b.count(3));
-	ASSERT_TRUE(b.count(4));
-}
-
-TEST(SPARSE_SET, emplace_push_pop) {
+TEST(SET_VECTOR, emplace_push_pop) {
 	vecl::sparse_set a;
 
 	ASSERT_EQ(a.empty(), true);
@@ -71,14 +44,14 @@ TEST(SPARSE_SET, emplace_push_pop) {
 	a.pop_back();
 	ASSERT_EQ(a.size(), 0);
 	ASSERT_EQ(a.count(0), 0);
-	
+
 	a.push_back(0);
 	ASSERT_EQ(a.size(), 1);
 	ASSERT_EQ(a.count(0), 1);
 
 }
 
-TEST(SPARSE_SET, insert) {
+TEST(SET_VECTOR, insert) {
 	vecl::sparse_set a;
 	{
 		auto [it, b] = a.insert(0);
@@ -103,7 +76,7 @@ TEST(SPARSE_SET, insert) {
 	}
 }
 
-TEST(SPARSE_SET, find) {
+TEST(SET_VECTOR, find) {
 	vecl::sparse_set a;
 	{
 		auto it = a.find(2);
@@ -119,7 +92,7 @@ TEST(SPARSE_SET, find) {
 	}
 }
 
-TEST(SPARSE_SET, erase) {
+TEST(SET_VECTOR, erase) {
 	vecl::sparse_set a;
 	a.emplace_back(0);
 	a.emplace_back(1);
@@ -147,7 +120,7 @@ TEST(SPARSE_SET, erase) {
 	}
 }
 
-TEST(SPARSE_SET, swap) {
+TEST(SET_VECTOR, swap) {
 	vecl::sparse_set a;
 	auto [ait, x] = a.emplace_back(0);
 	vecl::sparse_set b;
@@ -178,7 +151,7 @@ TEST(SPARSE_SET, swap) {
 	ASSERT_EQ(a.count(0), 1);
 }
 
-TEST(SPARSE_SET, clear) {
+TEST(SET_VECTOR, clear) {
 	vecl::sparse_set a;
 	int t = 1000;
 	while (--t)
@@ -191,7 +164,7 @@ TEST(SPARSE_SET, clear) {
 	ASSERT_EQ(a.count(1000), 0);
 }
 
-TEST(SPARSE_SET, equal) {
+TEST(SET_VECTOR, equal) {
 	vecl::sparse_set a;
 	vecl::sparse_set b;
 	vecl::sparse_set<size_t> c;
@@ -205,10 +178,10 @@ TEST(SPARSE_SET, equal) {
 	ASSERT_EQ(a, b);
 	ASSERT_EQ(a.set_equal(b), true);
 	ASSERT_EQ(vecl::set_equal(c, b), true);
-	ASSERT_EQ(vecl::set_equal(a,c,b), true);
+	ASSERT_EQ(vecl::set_equal(a, c, b), true);
 }
 
-TEST(SPARSE_SET, sort) {
+TEST(SET_VECTOR, sort) {
 	vecl::sparse_set a = { 1,2,3,4,5 };
 	vecl::sparse_set b = { 5,4,1,2,3 };
 
@@ -217,7 +190,7 @@ TEST(SPARSE_SET, sort) {
 	ASSERT_EQ(a, b);
 }
 
-TEST(SPARSE_SET, merge) {
+TEST(SET_VECTOR, merge) {
 	vecl::sparse_set a = { 1,2,3,4,5 };
 	vecl::sparse_set b = { 6,7,8,2,5 };
 	vecl::sparse_set c = { 1,2,3,4,5,6,7,8 };
@@ -227,7 +200,7 @@ TEST(SPARSE_SET, merge) {
 	ASSERT_EQ(a.set_equal(c), true);
 }
 
-TEST(SPARSE_SET, intersect) {
+TEST(SET_VECTOR, intersect) {
 	vecl::sparse_set a = { 1,2,3,4,5 };
 	vecl::sparse_set b = { 6,7,8,2,5 };
 	vecl::sparse_set c = { 2,5 };
@@ -235,3 +208,5 @@ TEST(SPARSE_SET, intersect) {
 	a.intersect(b);
 	ASSERT_EQ(a.set_equal(c), true);
 }
+
+*/

@@ -68,8 +68,7 @@ namespace vecl
 		broadcast(
 			const broadcast& other,
 			allocator_type mr
-		) :
-			_listeners(other._listeners, mr)
+		) :	_listeners(other._listeners, mr)
 		{
 		}
 
@@ -120,7 +119,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD allocator_type get_allocator() const VECL_NOEXCEPT
 		{
-			return _subs.get_allocator();
+			return _listeners.get_allocator();
 		}
 
 		/**
@@ -146,7 +145,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD bool empty() const VECL_NOEXCEPT
 		{
-			return _dense.empty();
+			return _listeners.empty();
 		}
 
 		/**

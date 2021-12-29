@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
+
 #include <vecl/publisher.hpp>
 #include <vecl/memory.hpp>
-
+#include <gtest/gtest.h>
 
 using namespace std;
 
@@ -242,6 +242,33 @@ TEST(PUBLISHER, token_reset) {
 	vecl::publisher p;
 
 	auto token = p.subscribe<test>(test_fn);
+
+	ASSERT_EQ(ans, 0);
+
+	p.publish<test>();
+
+	ASSERT_EQ(ans, 1);
+
+	token.reset();
+	p.publish<test>();
+
+	ASSERT_EQ(ans, 1);
+}
+
+TEST(PUBLISHER, SFINAE) {
+
+	int ans = 0;
+	auto test_fn = [&ans](const vecl::simple_message&) {
+		++ans;
+	};
+
+	vecl::publisher p;
+
+	struct not_derived : vecl::simple_message {
+
+	};
+
+	auto token = p.subscribe<not_derived>(test_fn);
 
 	ASSERT_EQ(ans, 0);
 

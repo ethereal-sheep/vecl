@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(vecl)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -34,8 +34,12 @@ endfunction()
 
 
 BASIC_TEST(_sparse_set vecl/sparse_set.cpp)
+BASIC_TEST(_set_vector vecl/set_vector.cpp)
+BASIC_TEST(_small_vector vecl/small_vector.cpp)
+BASIC_TEST(_enumerate vecl/enumerate.cpp)
+BASIC_TEST(_fixed_vector vecl/fixed_vector.cpp)
 BASIC_TEST(_memory_debug vecl/memory_debug.cpp)
 BASIC_TEST(_sparse_map vecl/sparse_map.cpp)
-BASIC_TEST(_views vecl/views.cpp)
 BASIC_TEST(_broadcast vecl/broadcast.cpp)
 BASIC_TEST(_publisher vecl/publisher.cpp)
+BASIC_TEST(_pipes vecl/pipes.cpp)

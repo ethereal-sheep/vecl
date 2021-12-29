@@ -24,61 +24,61 @@ namespace vecl
 		/**
 		 * @brief Magic number identifying memory allocated by this resource.
 		 */
-		static constexpr size_t allocated_pattern = 0xD1CEFACED1CEFACE;
+		static constexpr size_t _allocated_pattern = 0xD1CEFACED1CEFACE;
 
 		/**
 		 * @brief 2nd magic number written over other magic number upon 
 		 * deallocation.
 		 */
-		static constexpr size_t deallocated_pattern = 0xFADEDBEDFADEDBED;
+		static constexpr size_t _deallocated_pattern = 0xFADEDBEDFADEDBED;
 
 		/**
 		 * @brief Byte value used to scribble over deallocated memory.
 		 */
-		static constexpr std::byte scribble_byte{ 0xF9 };
+		static constexpr std::byte _scribble_byte{ 0xF9 };
 
 		/**
 		 * @brief Byte value used to write over newly-allocated memory and 
-		 * padding.
+		 * _padding.
 		 */
-		static constexpr std::byte padded_byte{ 0x7A }; 
+		static constexpr std::byte _padded_byte{ 0x7A }; 
 
 		/**
-		 * @brief Size of padding.
+		 * @brief Size of _padding.
 		 */
-		static constexpr size_t padding_size = alignof(max_align_t);
+		static constexpr size_t _padding_size = alignof(max_align_t);
 
 		/**
-		 * @brief Helper struct for aligning memory in header. 
-		 * Makes 'Header' readable.
+		 * @brief Helper struct for aligning memory in _header. 
+		 * Makes '_header' readable.
 		 */
-		struct alignas(std::max_align_t) padding
+		struct alignas(std::max_align_t) _padding
 		{
-			std::byte _padding[padding_size];
+			std::byte _pad[_padding_size];
 		};
 
 		/**
-		 * @brief Header struct to store allocation info.
+		 * @brief _header struct to store allocation info.
 		 */
-		struct header
+		struct _header
 		{
 			size_t _magic_number;
-			padding _padding;
+			_padding _pad;
 		};
 
 		/**
-		 * @brief Maximally-aligned raw buffer big enough for a header.
+		 * @brief Maximally-aligned raw buffer big enough for a _header.
 		 */
-		union aligned_header
+		union _aligned_header
 		{
-			header _object;
+			_header _object;
 			max_align_t _alignment;
 		};
 
 		/**
 		 * @brief Allocation record struct for each allocated block.
 		 */
-		struct allocation_record
+		struct _allocation_record
 		{
 			void* _ptr;
 			size_t _index;
@@ -91,7 +91,7 @@ namespace vecl
 		 */
 		constexpr size_t block_size(size_t bytes) 
 		{ 
-			return sizeof(aligned_header) + bytes + padding_size;
+			return sizeof(_aligned_header) + bytes + _padding_size;
 		}
 
 	public:
@@ -137,8 +137,8 @@ namespace vecl
 						_name.c_str(),
 						record._ptr, record._bytes, record._alignment);
 
-				aligned_header* head = 
-					static_cast<aligned_header*>(record._ptr) - 1;
+				_aligned_header* head = 
+					static_cast<_aligned_header*>(record._ptr) - 1;
 
 				_s_leaked_bytes += record._bytes;
 				_upstream->deallocate(
@@ -335,14 +335,14 @@ namespace vecl
 						_blocks_allocated);
 			}
 
-			// allocates extra bytes for header and padding
-			aligned_header* head;
+			// allocates extra bytes for _header and _padding
+			_aligned_header* head;
 
 			try
 			{
 				// undefined on multi-threaded applications
 				// if upstream is not thread-safe
-				head = static_cast<aligned_header*>(
+				head = static_cast<_aligned_header*>(
 					_upstream->allocate(block_size(bytes)));
 				
 				if (!head)
@@ -373,12 +373,12 @@ namespace vecl
 			void* user = head + 1;
 
 			// write over head and tail
-			std::memset((std::byte*)(head + 1) - padding_size,
-				std::to_integer<unsigned char>(padded_byte), padding_size);
+			std::memset((std::byte*)(head + 1) - _padding_size,
+				std::to_integer<unsigned char>(_padded_byte), _padding_size);
 			std::memset((std::byte*)(head + 1) + bytes,
-				std::to_integer<unsigned char>(padded_byte), padding_size);
+				std::to_integer<unsigned char>(_padded_byte), _padding_size);
 
-			head->_object._magic_number = allocated_pattern;
+			head->_object._magic_number = _allocated_pattern;
 
 			if (_blocks.count(user))
 			{
@@ -408,7 +408,7 @@ namespace vecl
 				const std::scoped_lock lock(_mutex);
 				_blocks.emplace(
 					user, 
-					allocation_record{ 
+					_allocation_record{ 
 						user, 
 						_blocks_allocated++, 
 						bytes, 
@@ -443,7 +443,7 @@ namespace vecl
 				return;
 			}
 
-			aligned_header* head = static_cast<aligned_header*>(ptr) - 1;
+			_aligned_header* head = static_cast<_aligned_header*>(ptr) - 1;
 
 			// find allocation record of ptr
 			auto block = _blocks.find(ptr);
@@ -452,7 +452,7 @@ namespace vecl
 			{
 				// if not found
 				// but the block looks like a deallocated block
-				if (deallocated_pattern == head->_object._magic_number)
+				if (_deallocated_pattern == head->_object._magic_number)
 				{
 					if (_callback)
 						_callback->report(
@@ -475,7 +475,7 @@ namespace vecl
 
 			}
 
-			if (allocated_pattern != head->_object._magic_number)
+			if (_allocated_pattern != head->_object._magic_number)
 			{
 				if (_callback)
 					_callback->report(
@@ -492,15 +492,15 @@ namespace vecl
 			{
 				// check for over/underrun
 
-				// Check the padding before the segment. Go backwards so we will
+				// Check the _padding before the segment. Go backwards so we will
 				// report the trashed byte nearest the segment.
 				std::byte* pcBegin = static_cast<std::byte*>(ptr) - 1;
 				std::byte* pcEnd = 
-					reinterpret_cast<std::byte*>(&head->_object._padding);
+					reinterpret_cast<std::byte*>(&head->_object._pad);
 
 				for (std::byte* pc = pcBegin; pcEnd <= pc; --pc)
 				{
-					if (padded_byte != *pc)
+					if (_padded_byte != *pc)
 					{
 						// underrun
 						if (_callback)
@@ -517,12 +517,12 @@ namespace vecl
 					}
 				}
 
-				// Check the padding after the segment.
+				// Check the _padding after the segment.
 				pcBegin = static_cast<std::byte*>(ptr) + block->second._bytes;
-				pcEnd = pcBegin + padding_size;
+				pcEnd = pcBegin + _padding_size;
 				for (std::byte* pc = pcBegin; pc < pcEnd; ++pc)
 				{
-					if (padded_byte != *pc)
+					if (_padded_byte != *pc)
 					{
 						// overrun
 						if (_callback)
@@ -552,7 +552,7 @@ namespace vecl
 					);
 
 			// set as dead
-			head->_object._magic_number = deallocated_pattern;
+			head->_object._magic_number = _deallocated_pattern;
 
 			// set history
 			_last_deallocated_num_bytes = bytes;
@@ -587,7 +587,7 @@ namespace vecl
 		
 		std::pmr::unordered_map<
 			void*,
-			allocation_record,
+			_allocation_record,
 			std::hash<void*>> _blocks;
 
 		memory* _upstream;
