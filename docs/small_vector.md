@@ -132,6 +132,10 @@ void hoo(vecl::small_vector_ref<int>& ref)
 } 
 ```
 
+### Allocator Awareness
+The current `small_vector` is not allocator aware, and implementation of such
+is a work in progress.
+
 # Further Reading
 For further insight on containers with small buffer optimizations, the 
 following resources are great for understanding why we do small buffer 
