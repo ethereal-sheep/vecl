@@ -145,24 +145,6 @@ TEST(ENUMERATE, start_end_special_xform) {
 	compare(split_times_two);
 }
 
-TEST(ENUMERATE, start_end_test_intellisense) {
-
-
-	auto split = [](int i)
-	{
-		return std::make_pair(i, i);
-	};
-
-	auto split_times_two = [](auto i)
-	{
-		return std::make_pair(i * 2.f, i / 2.f);
-	};
-
-	auto a = std::function<std::pair<int, int>(int)>(split);
-
-	auto en = vecl::enumerate(10, 20, split);
-}
-
 TEST(ENUMERATE, start_end_dead_function) {
 
 	int c = 5;

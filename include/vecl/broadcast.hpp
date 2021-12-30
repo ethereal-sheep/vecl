@@ -3,8 +3,10 @@
 
 #include "config/config.h"
 
+#include <memory>
 #include <functional>
 #include <vector>
+#include <memory_resource>
 
 namespace vecl
 {

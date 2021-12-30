@@ -4,6 +4,7 @@
 #include "config/config.h"
 #include "concepts.hpp"
 #include <functional> // function
+#include <utility>
 
 namespace vecl
 {
@@ -17,7 +18,7 @@ namespace vecl
 	 * @tparam R Return type of the enumeration
 	 */
 	template<std::integral T, typename R>
-	class enumerable
+	class _enumerable_t
 	{
 		T _start, _end;
 		std::function<R(T)> _func;
@@ -27,7 +28,7 @@ namespace vecl
 		 */
 		class _iterator
 		{
-			friend enumerable;
+			friend _enumerable_t;
 
 			T _it;
 			const int _dir;
@@ -132,6 +133,11 @@ namespace vecl
 
 		};
 
+	public:
+		using value_type = R;
+		using pointer = const T*;
+		using iterator = _iterator;
+
 		/**
 		 * @brief Private Constructor. 
 		 * Copy and move constructions and assignments are defaulted.
@@ -140,86 +146,8 @@ namespace vecl
 		 * @param end End of range
 		 * @param func Transform function called on each element in range
 		 */
-		enumerable(T start, T end, std::function<R(T)> func)
+		_enumerable_t(T start, T end, std::function<R(T)> func)
 			: _start{ start }, _end{ end }, _func{ std::move(func) } {}
-
-		/**
-		 * @note FRIENDS
-		 */
-		/**
-		 * @brief Enumerates over a range from 0 to end. If end < 0, the
-		 * enumeration goes in the -1 direction.
-		 *
-		 * @tparam T Integral type to enumerate over
-		 *
-		 * @param end End of range
-		 *
-		 * @return Enumerable object
-		 */
-		template<std::integral T>
-		friend constexpr auto enumerate(T end)
-			->enumerable<T, T>;
-
-		/**
-		 * @brief Enumerates over a range from start to end. If end < start, 
-		 * the enumeration goes in the -1 direction.
-		 *
-		 * @tparam T Integral type to enumerate over
-		 *
-		 * @param start Start of range
-		 * @param end End of range
-		 *
-		 * @return Enumerable object
-		 */
-		template<std::integral T>
-		friend constexpr auto enumerate(T start, T end)
-			->enumerable<T, T>;
-
-		/**
-		 * @brief Enumerates over a range from 0 to end and tranforms each 
-		 * element in the range with a corresponding function.
-		 *
-		 * If end < 0, the enumeration goes in the -1 direction.
-		 *
-		 * @tparam T Integral type to enumerate over
-		 * @tparam Func Non-void invocable type
-		 *
-		 * @param start Start of range
-		 * @param end End of range
-		 * @param func Transform function called on each element in range
-		 *
-		 * @return Enumerable object
-		 */
-		template<std::integral T, typename Func>
-		requires non_void_invocable<Func, T>
-		friend constexpr auto enumerate(T end, Func func)
-			->enumerable<T, std::invoke_result_t<Func, T>>;
-
-		/**
-		 * @brief Enumerates over a range from 0 to end and tranforms each 
-		 * element in the range with a corresponding function.
-		 *
-		 * If end < 0, the enumeration goes in the -1 direction.
-		 *
-		 * @tparam T Integral type to enumerate over
-		 * @tparam Func Non-void invocable type
-		 *
-		 * @param start Start of range
-		 * @param end End of range
-		 * @param func Transform function called on each element in range
-		 *
-		 * @return Enumerable object
-		 */
-		template<std::integral T, typename Func>
-		requires non_void_invocable<Func, T>
-		friend constexpr auto enumerate(T start, T end, Func func)
-			->enumerable<T, std::invoke_result_t<Func, T>>;
-
-
-	public:
-		using value_type = R;
-		using pointer = const T*;
-		using iterator = _iterator;
 
 		/**
 		 * @note ITERATORS
@@ -246,38 +174,89 @@ namespace vecl
 	};
 
 
+	/**
+	 * @brief Enumerates over a range from 0 to end. If end < 0, the
+	 * enumeration goes in the -1 direction.
+	 *
+	 * @tparam T Integral type to enumerate over
+	 *
+	 * @param end End of range
+	 *
+	 * @return Enumerable object
+	 */
 	template<std::integral T>
 	VECL_NODISCARD constexpr auto enumerate(T end) 
-		-> enumerable<T,T>
+		-> _enumerable_t<T,T>
 	{
-		return enumerable<T,T>(0, end, 
+		return _enumerable_t<T,T>(0, end, 
 			[](T p) constexpr -> T { return p; });
 	}
 
+	/**
+	 * @brief Enumerates over a range from start to end. If end < start, 
+	 * the enumeration goes in the -1 direction.
+	 *
+	 * @tparam T Integral type to enumerate over
+	 *
+	 * @param start Start of range
+	 * @param end End of range
+	 *
+	 * @return Enumerable object
+	 */
 	template<std::integral T>
 	VECL_NODISCARD constexpr auto enumerate(T start, T end) 
-		-> enumerable<T, T>
+		-> _enumerable_t<T, T>
 	{
-		return enumerable<T,T>(start, end, 
+		return _enumerable_t<T,T>(start, end, 
 			[](T p) constexpr -> T { return p; });
 	}
 
+	/**
+	 * @brief Enumerates over a range from 0 to end and tranforms each 
+	 * element in the range with a corresponding function.
+	 *
+	 * If end < 0, the enumeration goes in the -1 direction.
+	 *
+	 * @tparam T Integral type to enumerate over
+	 * @tparam Func Non-void invocable type
+	 *
+	 * @param start Start of range
+	 * @param end End of range
+	 * @param func Transform function called on each element in range
+	 *
+	 * @return Enumerable object
+	 */
 	template<std::integral T, typename Func>
 	requires non_void_invocable<Func, T>
 	VECL_NODISCARD constexpr auto enumerate(T end, Func func) 
-		-> enumerable<T, std::invoke_result_t<Func, T>>
+		-> _enumerable_t<T, std::invoke_result_t<Func, T>>
 	{
 		using R = std::invoke_result_t<Func, T>;
-		return enumerable<T, R>(0, end, func);
+		return _enumerable_t<T, R>(0, end, func);
 	}
 
+	/**
+	 * @brief Enumerates over a range from 0 to end and tranforms each 
+	 * element in the range with a corresponding function.
+	 *
+	 * If end < 0, the enumeration goes in the -1 direction.
+	 *
+	 * @tparam T Integral type to enumerate over
+	 * @tparam Func Non-void invocable type
+	 *
+	 * @param start Start of range
+	 * @param end End of range
+	 * @param func Transform function called on each element in range
+	 *
+	 * @return Enumerable object
+	 */
 	template<std::integral T, typename Func>
 	requires non_void_invocable<Func, T>
 	VECL_NODISCARD constexpr auto enumerate(T start, T end, Func func) 
-		-> enumerable<T, std::invoke_result_t<Func, T>>
+		-> _enumerable_t<T, std::invoke_result_t<Func, T>>
 	{
 		using R = std::invoke_result_t<Func, T>;
-		return enumerable<T, R>(start, end, func);
+		return _enumerable_t<T, R>(start, end, func);
 	}
 }
 

@@ -147,7 +147,7 @@ TEST(MEMORY_DEBUG, reg_callback) {
 			"name",
 			vecl::get_default_memory_debug_callback());
 
-		a.deallocate(nullptr, 0, 4);
+		//a.deallocate(nullptr, 0, 4); // triggers warning
 	}
 
 }
@@ -264,7 +264,7 @@ TEST(MEMORY_DEBUG, mt_callback) {
 			"name",
 			vecl::get_default_memory_debug_callback());
 
-		a.deallocate(nullptr, 0, 4);
+		// a.deallocate(nullptr, 0, 4); // triggers warning
 	}
 
 

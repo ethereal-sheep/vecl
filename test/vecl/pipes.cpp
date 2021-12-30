@@ -18,7 +18,7 @@ TEST(PIPES, basic_transform_pipe) {
 
 	auto end = pipe << v;
 
-	for (int i = 0; i < end.size(); ++i)
+	for (int i = 0; i < (int)end.size(); ++i)
 	{
 		ASSERT_EQ(end[0], lambda(v[0]));
 	}
@@ -39,7 +39,7 @@ TEST(PIPES, combined_transform_pipe) {
 
 	auto end = pipe2 + pipe1 << v;
 
-	for (int i = 0; i < end.size(); ++i)
+	for (int i = 0; i < (int)end.size(); ++i)
 	{
 		ASSERT_EQ(end[0], lambda2(lambda1(v[0])));
 	}
@@ -48,9 +48,9 @@ TEST(PIPES, basic_transform_pipe_diff_type) {
 
 	std::vector<int> v = { 1,2,3,4,5 };
 
-	auto lambda1 = [](int a) {
-		return a * 2;
-	};
+	// auto lambda1 = [](int a) {
+	// 	return a * 2;
+	// };
 	auto lambda2 = [](int a) {
 		return a + 2.f;
 	};
@@ -59,7 +59,7 @@ TEST(PIPES, basic_transform_pipe_diff_type) {
 
 	auto end = pipe2 << v;
 
-	for (int i = 0; i < end.size(); ++i)
+	for (int i = 0; i < (int)end.size(); ++i)
 	{
 		ASSERT_EQ(end[0], lambda2(v[0]));
 	}
@@ -86,7 +86,7 @@ TEST(PIPES, combine_transform_pipe_diff_type) {
 
 	auto end = combined << v;
 
-	for (int i = 0; i < end.size(); ++i)
+	for (int i = 0; i < (int)end.size(); ++i)
 	{
 		ASSERT_EQ(end[0], lambda3(lambda2(lambda1(v[0]))));
 	}

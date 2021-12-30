@@ -40,7 +40,7 @@ namespace vecl::pipes
 		 * global pmr resource via get_default_resource().
 		 */
 		template<typename C, typename V>
-		requires back_insertable<C, V>
+		requires (back_insertable<C, V>)
 			constexpr auto insert_into(C& c, V&& v)
 		{
 			c.push_back(std::forward<V>(v));
@@ -53,7 +53,7 @@ namespace vecl::pipes
 		 * global pmr resource via get_default_resource().
 		 */
 		template<typename C, typename V>
-		requires insertable<C, V> && !back_insertable<C, V>
+		requires (insertable<C, V> && !back_insertable<C, V>)
 			constexpr auto insert_into(C& c, V&& v)
 		{
 			c.insert(std::forward<V>(v));

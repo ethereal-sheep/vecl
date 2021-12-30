@@ -1,8 +1,10 @@
 #ifndef VECL_CONCEPTS_HPP
 #define VECL_CONCEPTS_HPP
 
-#include <concepts>
 #include "type_traits.hpp"
+
+#include <concepts>
+#include <utility>
 
 namespace vecl
 {
