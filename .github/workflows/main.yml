@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  linux:
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        compiler:
+          - pkg: g++-10
+            exe: g++-10
+          - pkg: g++-11
+            exe: g++-11
+          - pkg: g++
+            exe: g++
+          - pkg: clang-11
+            exe: clang++-11
+          - pkg: clang-12
+            exe: clang++-12
+          - pkg: clang
+            exe: clang++
+      
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install ${{ matrix.compiler.pkg }} -y
+      - name: Compile tests
+        working-directory: build
+        env:
+          CXX: ${{ matrix.compiler.exe }}
+        run: |
+          cmake -DENTT_BUILD_TESTING=ON -DENTT_BUILD_LIB=ON -DENTT_BUILD_EXAMPLE=ON ..
+          make -j4
+      - name: Run tests
+        working-directory: build/test
+        env:
+          CTEST_OUTPUT_ON_FAILURE: 1
+        run: ctest --timeout 30 -C Debug -j4
