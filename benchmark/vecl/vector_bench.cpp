@@ -163,22 +163,18 @@ BENCHMARK_TEMPLATE(ConstructWithSizeAndElement, vecl::small_vector<int, 16>)->Ra
 BENCHMARK_TEMPLATE(EmplaceBack, std::vector<int>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBack, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBack, vecl::small_vector<int, 16>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(EmplaceBack, vecl::small_vector<int, 16, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
 BENCHMARK_TEMPLATE(EmplaceBackReserve, std::vector<int>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::small_vector<int, 16>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::small_vector<int, 16, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
 BENCHMARK_TEMPLATE(EmplaceBackReserve, std::vector<std::string>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::fixed_vector<std::string, MAX_SIZE>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::small_vector<std::string, 4>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(EmplaceBackReserve, vecl::small_vector<std::string, 4, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
 BENCHMARK_TEMPLATE(RandomSortedInsertion, std::vector<size_t>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(RandomSortedInsertion, vecl::fixed_vector<size_t, MAX_SIZE * 2>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(RandomSortedInsertion, vecl::small_vector<size_t, 8>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
-BENCHMARK_TEMPLATE(RandomSortedInsertion, vecl::small_vector<size_t, 8, 1.5>)->RangeMultiplier(2)->Range(8, MAX_SIZE);
 
 BENCHMARK_TEMPLATE(RandomSizedSwap, std::vector<int>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
 BENCHMARK_TEMPLATE(RandomSizedSwap, vecl::fixed_vector<int, MAX_SIZE>)->RangeMultiplier(4)->Range(8, MAX_SIZE);
