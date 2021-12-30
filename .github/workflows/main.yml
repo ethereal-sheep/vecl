@@ -30,7 +30,7 @@ jobs:
           CXX: ${{ matrix.compiler.exe }}
         run: |
           mkdir build
-          cmake -B build --config Debug --target all -j 14 -S .
+          cmake -B build --config Debug --target all -S .
           cd build
           make -j4
       - name: Run tests
