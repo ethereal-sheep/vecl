@@ -27,13 +27,13 @@ jobs:
         run: |
           cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug ${{ matrix.toolset_option }}
           cd build
-          make -j4
+          cmake --build .
       - name: Run tests
         working-directory: build/test
         env:
           CTEST_OUTPUT_ON_FAILURE: 1
-        run: | 
-          ctest --timeout 30 -C Debug -j4
+        run: |
+          ctest --timeout 30 -C Debug -j4 --rerun-failed --output-on-failure
 
   linux:
     timeout-minutes: 5
@@ -66,4 +66,4 @@ jobs:
         env:
           CTEST_OUTPUT_ON_FAILURE: 1
         run: |
-          ctest --timeout 30 -C Debug -j4
+          ctest --timeout 30 -C Debug -j4 --rerun-failed --output-on-failure
