@@ -30,11 +30,12 @@ jobs:
           CXX: ${{ matrix.compiler.exe }}
         run: |
           mkdir build
-          cmake --build build --config Debug --target all -j 14
+          cmake -B build --config Debug --target all -j 14 -S .
           cd build
           make -j4
       - name: Run tests
-        working-directory: build/test
         env:
           CTEST_OUTPUT_ON_FAILURE: 1
-        run: ctest --timeout 30 -C Debug -j4
+        run: |
+          cd test
+          ctest --timeout 30 -C Debug -j4
