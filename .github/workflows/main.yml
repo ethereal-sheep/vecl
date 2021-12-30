@@ -29,8 +29,7 @@ jobs:
         env:
           CXX: ${{ matrix.compiler.exe }}
         run: |
-          mkdir build
-          cmake --build build --config Debug
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
           cd build
           make -j4
       - name: Run tests
