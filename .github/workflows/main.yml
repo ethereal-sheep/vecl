@@ -12,12 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        toolset: [default, clang-cl, v141]
-        include:
-          - toolset: clang-cl
-            toolset_option: -T"ClangCl"
-          - toolset: v141
-            toolset_option: -T"v141"
+        toolset: [MSVC]
 
     runs-on: windows-latest
 
@@ -25,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Compile tests
         run: |
-          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug ${{ matrix.toolset_option }}
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
           cd build
           cmake --build .
       - name: Run tests
