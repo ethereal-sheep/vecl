@@ -2,12 +2,42 @@ name: build
 
 on:
   push:
+
   pull_request:
 
 jobs:
 
+  windows:
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        toolset: [default, clang-cl, v141]
+        include:
+          - toolset: clang-cl
+            toolset_option: -T"ClangCl"
+          - toolset: v141
+            toolset_option: -T"v141"
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Compile tests
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug ${{ matrix.toolset_option }}
+          cd build
+          make -j4
+    - name: Run tests
+        working-directory: build/test
+      env:
+        CTEST_OUTPUT_ON_FAILURE: 1
+      run: | 
+        ctest --timeout 30 -C Debug -j4
+
+
   linux:
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     strategy:
       matrix:
