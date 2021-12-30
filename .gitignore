@@ -19,4 +19,5 @@ build
 docker-compose.debug.yml
 docker-compose.yml
 Dockerfile
+.devcontainer\**
 .devcontainer/devcontainer.json
