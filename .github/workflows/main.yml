@@ -25,6 +25,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ${{ matrix.compiler.pkg }} -y
+          sudo apt-get install cmake -y
       - name: Compile tests
         env:
           CXX: ${{ matrix.compiler.exe }}
