@@ -1,0 +1,72 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+  
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+
+jobs:
+
+  windows:
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        toolset: [MSVC]
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile tests
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
+          cd build
+          cmake --build .
+      - name: Run tests
+        working-directory: build/test
+        env:
+          CTEST_OUTPUT_ON_FAILURE: 1
+        run: |
+          ctest --timeout 30 -C Debug -j4 --rerun-failed --output-on-failure
+
+  linux:
+    timeout-minutes: 5
+
+    strategy:
+      matrix:
+        compiler:
+          - pkg: g++-10
+            exe: g++-10
+          - pkg: clang-11
+            exe: clang++-11
+      
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install ${{ matrix.compiler.pkg }} -y
+      - name: Compile tests
+        env:
+          CXX: ${{ matrix.compiler.exe }}
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Debug
+          cd build
+          make -j4
+      - name: Run tests
+        working-directory: build/test
+        env:
+          CTEST_OUTPUT_ON_FAILURE: 1
+        run: |
+          ctest --timeout 30 -C Debug -j4 --rerun-failed --output-on-failure

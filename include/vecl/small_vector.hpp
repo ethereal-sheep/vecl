@@ -43,9 +43,10 @@ namespace vecl
 		using const_pointer = const value_type*;
 
 		using iterator = pointer;
-		using const_iterator = const iterator;
+		using const_iterator = const_pointer;
 		using reverse_iterator = typename std::reverse_iterator<iterator>;
-		using const_reverse_iterator = const reverse_iterator;
+		using const_reverse_iterator = 
+			typename std::reverse_iterator<const_iterator>;
 
 
 	private:
@@ -363,7 +364,7 @@ namespace vecl
 		 * of the container.
 		 */
 		template <typename It>
-		requires !std::is_same<std::remove_const_t<It>, T*>::value
+		requires (!std::is_same<std::remove_const_t<It>, T*>::value)
 			constexpr void _assert_valid_after_clear(It, It) const {}
 
 			
@@ -1338,6 +1339,10 @@ namespace vecl
 			// they are ours and this is a non-const function
 			iterator from = const_cast<iterator>(cfrom);
 			iterator to = const_cast<iterator>(cto);
+			
+			// if they are the same don't erase
+			if(from == to) return from;
+			
 			// just move left and destroy
 			iterator last = std::move(to, end(), from);
 			_destroy_range(last, end());

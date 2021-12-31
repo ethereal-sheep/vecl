@@ -89,12 +89,6 @@ namespace vecl
 			_sparse_map_iterator() = delete;
 
 			/** @brief Standard boiler plate for random-access iterators. */
-			_sparse_map_iterator& operator=(const _sparse_map_iterator& rhs)
-			{
-				return it1 = rhs.it1, it2 = rhs.it2, *this;
-			}
-
-			/** @brief Standard boiler plate for random-access iterators. */
 			_sparse_map_iterator& operator+=(size_t rhs)
 			{
 				return it1 += rhs, it2 += rhs, *this;

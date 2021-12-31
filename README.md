@@ -1,5 +1,9 @@
+![vecl-banner](https://user-images.githubusercontent.com/55541825/147809159-1a2373ae-35da-446a-8851-05c131398f90.png)
+
+[![Build Status](https://github.com/ethereal-sheep/vecl/workflows/build/badge.svg)](https://github.com/ethereal-sheep/vecl/actions)
 # Very Extensive Container Library
 `vecl` is a header-only container library written with **modern C++**. 
+
 It provides an extensive number of multi-purpose containers/constructs with 
 many use cases. 
 While "extensive" may be an overstatement, the idea is to motivate myself to 
