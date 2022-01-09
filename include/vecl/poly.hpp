@@ -113,7 +113,6 @@ namespace vecl
 		static constexpr decltype(auto) get_vtable(std::index_sequence<Index...>)
 		{
 			using Table = vtable<Concept>::type;
-			using Members = Concept:: template Members<Type>;
 
 			return std::make_tuple(
 				get_vtable_entry<Type, vecl::value_list_element_v<Index, Members>>(
@@ -128,9 +127,9 @@ namespace vecl
 
 			return &vtable;
 		}
-
-		using type = decltype(build_vtable<Concept>());
 	
+		using type = decltype(build_vtable<Concept>());
+
 	public:
 		vtable() = delete;
 
