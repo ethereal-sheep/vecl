@@ -115,44 +115,56 @@ namespace vecl
 	}
 
 	template <typename Poly>
-	struct PolyBase
+	class PolyBase
 	{
-		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(
-			const PolyBase& self, Args&& ... args) const
-		{
-			const auto& poly = static_cast<const Poly&>(self);
-			const auto& vtable = *poly._vtable;
+	private:
+		template<auto Member, typename Poly, typename... Args>
+		friend decltype(auto) PolyCall(Poly&& self, Args&& ...args);
 
-			return std::get<Member>(vtable)(poly._underlying, std::forward<Args>(args)...);
+		template <auto Member, typename... Args>
+		[[nodiscard]] decltype(auto) invoke(const PolyBase& self, Args&& ...args) const
+		{
+			return static_cast<const Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
 		}
 
 		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(
-			PolyBase& self, Args&& ... args)
+		[[nodiscard]] decltype(auto) invoke(PolyBase& self, Args&& ...args)
 		{
-			auto& poly = static_cast<Poly&>(self);
-			const auto& vtable = *poly._vtable;
-
-			return std::get<Member>(vtable)(poly._underlying, std::forward<Args>(args)...);
+			return static_cast<Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
 		}
 	};
 	
 	template <typename Concept>
 	class Poly : public Concept:: template Interface<PolyBase<Poly<Concept>>>
 	{
-	public:
 		using VTable = decltype(BuildTable<Concept>());
 
 		std::any	  _underlying;
 		const VTable* _vtable;
 
+	public:
 		template <typename Any>
 		Poly(Any&& any)
 			: _underlying{std::forward<Any>(any)}
 			, _vtable { FillTable<Concept, Any>() }
 		{
 		}
+
+	private:
+		friend PolyBase<Poly<Concept>>;
+
+		template <auto Member, typename... Args>
+		[[nodiscard]] decltype(auto) invoke(Args&& ...args)
+		{
+			return std::get<Member>(*_vtable)(_underlying, std::forward<Args>(args)...);
+		}
+
+		template <auto Member, typename... Args>
+		[[nodiscard]] decltype(auto) invoke(Args&& ...args) const
+		{
+			return std::get<Member>(*_vtable)(_underlying, std::forward<Args>(args)...);
+		}
+
 	};
 
 	template<auto Member, typename Poly, typename... Args>
