@@ -11,7 +11,7 @@ struct Shape
 	};
 
 	template <typename T>
-	using Members = vecl::PolyMembers<&T::draw, &T::transform>;
+	using Members = vecl::poly_members<&T::draw, &T::transform>;
 };
 
 struct Square
@@ -29,7 +29,7 @@ struct Circle
 
 TEST(_poly, poly)
 {
-	std::vector<vecl::Poly<Shape>> shapes;
+	std::vector<vecl::poly<Shape>> shapes;
 
 	shapes.emplace_back(Square{});
 	shapes.emplace_back(Circle{});

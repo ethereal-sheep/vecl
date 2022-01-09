@@ -35,10 +35,10 @@ namespace vecl
 
 namespace vecl
 {
-	template <auto... Ts>
-	using PolyMembers = value_list<Ts...>;
+	template <auto... Values>
+	using poly_members = value_list<Values...>;
 
-	struct PolyInspector
+	struct poly_inspector
 	{
 		template<class Type>
 		operator Type&& () const 
@@ -47,125 +47,147 @@ namespace vecl
 		}
 
 		template <auto Member, typename... Args>
-		PolyInspector invoke(Args&& ...) const 
+		poly_inspector invoke(Args&& ...) const
 		{ 
 			return *this; 
 		}
 
 		template <auto Member, typename... Args>
-		PolyInspector invoke(Args&& ...) 
+		poly_inspector invoke(Args&& ...)
 		{ 
 			return *this;  
 		}
 	};
 
-	template <typename Ret, typename Cls, typename... Args>
-	auto BuildTableEntry(Ret(Cls::*)(Args...))->Ret(*)(std::any&, Args...);
-
-	template <typename Ret, typename Cls, typename... Args>
-	auto BuildTableEntry(Ret(Cls::*)(Args...) const)->Ret(*)(const std::any&, Args...);
-
-	template <typename Concept, std::size_t... Index>
-	decltype(auto) BuildTable(std::index_sequence<Index...>)
-	{
-		using Inspector = Concept:: template Interface<PolyInspector>;
-		using Members = Concept:: template Members<Inspector>;
-		return std::make_tuple(BuildTableEntry(vecl::value_list_element_v<Index, Members>)...);
-	}
+	template <typename Concept>
+	class poly;
 
 	template <typename Concept>
-	decltype(auto) BuildTable()
+	class vtable
 	{
-		using Inspector = Concept:: template Interface<PolyInspector>;
-		using Members = Concept:: template Members<Inspector>;
-		return BuildTable<Concept>(std::make_index_sequence<Members::size>{});
-	}
+	private:
+		friend poly<Concept>;
 
-	template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-	decltype(auto) BuildTableEntry()
-	{
-		return +[](Any& any, Args... args)
+		template <typename Ret, typename Cls, typename... Args>
+		static constexpr auto 
+		build_vtable_entry(Ret(Cls::*)(Args...))
+			-> Ret(*)(std::any&, Args...);
+
+		template <typename Ret, typename Cls, typename... Args>
+		static constexpr auto 
+		build_vtable_entry(Ret(Cls::*)(Args...) const)
+			-> Ret(*)(const std::any&, Args...);
+
+		template <typename Concept, std::size_t... Index>
+		static constexpr decltype(auto) build_vtable(std::index_sequence<Index...>)
 		{
-			return std::invoke(Candidate, std::any_cast<Type>(any), std::forward<Args>(args)...);
-		};
-	}
+			using Inspector = Concept:: template Interface<poly_inspector>;
+			using Members = Concept:: template Members<Inspector>;
 
-	template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-	auto BuildTableEntry(Ret(*)(Any&, Args...))
-	{
-		return BuildTableEntry<Type, Candidate, Ret, Any, Args...>();
-	}
+			return std::make_tuple(
+				build_vtable_entry(vecl::value_list_element_v<Index, Members>)...);
+		}
 
-	template <typename Concept, typename Type, std::size_t... Index>
-	constexpr decltype(auto) FillTable(std::index_sequence<Index...>)
-	{
-		using Table = decltype(BuildTable<Concept>());
-		using Members = Concept:: template Members<Type>;
+		template <typename Concept>
+		static constexpr decltype(auto) build_vtable()
+		{
+			using Inspector = Concept:: template Interface<poly_inspector>;
+			using Members = Concept:: template Members<Inspector>;
 
-		static constexpr Table table;
-		return std::make_tuple(
-			BuildTableEntry<Type, vecl::value_list_element_v<Index, Members>>(
-				std::get<Index>(table))...);
-	}
+			return build_vtable<Concept>(std::make_index_sequence<Members::size>{});
+		}
 
-	template <typename Concept, typename Type>
-	decltype(auto) FillTable()
-	{
-		using Members = Concept:: template Members<Type>;
-		static auto table = FillTable<Concept, Type>(std::make_index_sequence<Members::size>{});
+		template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
+		static constexpr decltype(auto) get_vtable_entry()
+		{
+			return +[](Any& any, Args... args)
+			{
+				return std::invoke(Candidate, std::any_cast<Type>(any), std::forward<Args>(args)...);
+			};
+		}
 
-		return &table;
-	}
+		template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
+		static constexpr auto get_vtable_entry(Ret(*)(Any&, Args...))
+		{
+			return get_vtable_entry<Type, Candidate, Ret, Any, Args...>();
+		}
+
+		template <typename Type, std::size_t... Index>
+		static constexpr decltype(auto) get_vtable(std::index_sequence<Index...>)
+		{
+			using Table = vtable<Concept>::type;
+			using Members = Concept:: template Members<Type>;
+
+			return std::make_tuple(
+				get_vtable_entry<Type, vecl::value_list_element_v<Index, Members>>(
+					std::get<Index>(Table{}))...);
+		}
+
+		template <typename Type>
+		static constexpr decltype(auto) get_ptr()
+		{
+			using Members = Concept:: template Members<Type>;
+			static constexpr auto vtable = get_vtable<Type>(std::make_index_sequence<Members::size>{});
+
+			return &vtable;
+		}
+
+		using type = decltype(build_vtable<Concept>());
+	
+	public:
+		vtable() = delete;
+
+	};
 
 	template <typename Poly>
-	class PolyBase
+	class poly_base
 	{
 	private:
 		template<auto Member, typename Poly, typename... Args>
-		friend decltype(auto) poly_call(Poly&& self, Args&& ...args);
+		friend decltype(auto) poly_call(Poly&&, Args&& ...);
 
 		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(const PolyBase& self, Args&& ...args) const
+		[[nodiscard]] decltype(auto) invoke(const poly_base& self, Args&& ...args) const
 		{
 			return static_cast<const Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
 		}
 
 		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(PolyBase& self, Args&& ...args)
+		[[nodiscard]] decltype(auto) invoke(poly_base& self, Args&& ...args)
 		{
 			return static_cast<Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
 		}
 	};
 	
 	template <typename Concept>
-	class Poly : public Concept:: template Interface<PolyBase<Poly<Concept>>>
+	class poly : public Concept:: template Interface<poly_base<poly<Concept>>>
 	{
-		using VTable = decltype(BuildTable<Concept>());
+		using VTable = vtable<Concept>::type;
 
 		std::any	  _underlying;
-		const VTable* _vtable;
-
-	public:
-		template <typename Any>
-		Poly(Any&& any)
-			: _underlying{std::forward<Any>(any)}
-			, _vtable { FillTable<Concept, Any>() }
-		{
-		}
+		const VTable* _vtable_ptr;
 
 	private:
-		friend PolyBase<Poly<Concept>>;
+		friend poly_base<poly<Concept>>;
 
 		template <auto Member, typename... Args>
 		[[nodiscard]] decltype(auto) invoke(Args&& ...args)
 		{
-			return std::get<Member>(*_vtable)(_underlying, std::forward<Args>(args)...);
+			return std::get<Member>(*_vtable_ptr)(_underlying, std::forward<Args>(args)...);
 		}
 
 		template <auto Member, typename... Args>
 		[[nodiscard]] decltype(auto) invoke(Args&& ...args) const
 		{
-			return std::get<Member>(*_vtable)(_underlying, std::forward<Args>(args)...);
+			return std::get<Member>(*_vtable_ptr)(_underlying, std::forward<Args>(args)...);
+		}
+
+	public:
+		template <typename Any>
+		poly(Any&& any)
+			: _underlying{std::forward<Any>(any)}
+			, _vtable_ptr{ vtable<Concept>::template get_ptr<Any>() }
+		{
 		}
 	};
 
