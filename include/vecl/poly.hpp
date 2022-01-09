@@ -41,17 +41,20 @@ namespace vecl
 	struct PolyInspector
 	{
 		template<class Type>
-		operator Type&& () const {
+		operator Type&& () const 
+		{
 			return static_cast<Type&&>(*this);
 		}
 
 		template <auto Member, typename... Args>
-		PolyInspector invoke(Args&& ...) const { 
+		PolyInspector invoke(Args&& ...) const 
+		{ 
 			return *this; 
 		}
 
 		template <auto Member, typename... Args>
-		PolyInspector invoke(Args&& ...) { 
+		PolyInspector invoke(Args&& ...) 
+		{ 
 			return *this;  
 		}
 	};
