@@ -122,7 +122,7 @@ namespace vecl
 	{
 	private:
 		template<auto Member, typename Poly, typename... Args>
-		friend decltype(auto) PolyCall(Poly&& self, Args&& ...args);
+		friend decltype(auto) poly_call(Poly&& self, Args&& ...args);
 
 		template <auto Member, typename... Args>
 		[[nodiscard]] decltype(auto) invoke(const PolyBase& self, Args&& ...args) const
@@ -167,11 +167,10 @@ namespace vecl
 		{
 			return std::get<Member>(*_vtable)(_underlying, std::forward<Args>(args)...);
 		}
-
 	};
 
 	template<auto Member, typename Poly, typename... Args>
-	decltype(auto) PolyCall(Poly&& self, Args&& ...args)
+	decltype(auto) poly_call(Poly&& self, Args&& ...args)
 	{
 		return std::forward<Poly>(self). 
 				template invoke<Member>(self, std::forward<Args>(args)...);

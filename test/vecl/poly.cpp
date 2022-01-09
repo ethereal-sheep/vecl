@@ -6,8 +6,8 @@ struct Shape
 	template <typename Base>
 	struct Interface : public Base
 	{
-		void draw() const { vecl::PolyCall<0>(*this); }
-		int transform(float f) const { return vecl::PolyCall<1>(*this, f); }
+		void draw() const { vecl::poly_call<0>(*this); }
+		int transform(float f) const { return vecl::poly_call<1>(*this, f); }
 	};
 
 	template <typename T>
