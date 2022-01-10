@@ -69,7 +69,9 @@ namespace vecl
 		friend poly<Concept>;
 
 		using Inspector = Concept:: template Interface<poly_inspector>;
-		using Members = Concept:: template Members<Inspector>;
+
+		template <typename Type>
+		using Members = Concept:: template Members<Type>;
 
 		template <typename Ret, typename Cls, typename... Args>
 		static constexpr auto 
@@ -85,13 +87,13 @@ namespace vecl
 		static constexpr decltype(auto) build_vtable(std::index_sequence<Index...>)
 		{
 			return std::make_tuple(
-				build_vtable_entry(vecl::value_list_element_v<Index, Members>)...);
+				build_vtable_entry(vecl::value_list_element_v<Index, Members<Inspector>>)...);
 		}
 
 		template <typename Concept>
 		static constexpr decltype(auto) build_vtable()
 		{
-			return build_vtable<Concept>(std::make_index_sequence<Members::size>{});
+			return build_vtable<Concept>(std::make_index_sequence<Members<Inspector>::size>{});
 		}
 
 		template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
@@ -115,7 +117,7 @@ namespace vecl
 			using Table = vtable<Concept>::type;
 
 			return std::make_tuple(
-				get_vtable_entry<Type, vecl::value_list_element_v<Index, Members>>(
+				get_vtable_entry<Type, vecl::value_list_element_v<Index, Members<Type>>>(
 					std::get<Index>(Table{}))...);
 		}
 
