@@ -84,35 +84,36 @@ namespace vecl
 			-> Ret(*)(const std::any&, Args...);
 
 		template <typename Concept, std::size_t... Index>
-		static constexpr decltype(auto) build_vtable(std::index_sequence<Index...>)
+		static constexpr decltype(auto) 
+		build_vtable(std::index_sequence<Index...>)
 		{
-			return std::make_tuple(
-				build_vtable_entry(vecl::value_list_element_v<Index, Members<Inspector>>)...);
+			return std::make_tuple(build_vtable_entry(
+				vecl::value_list_element_v<Index, Members<Inspector>>)...);
 		}
 
 		template <typename Concept>
 		static constexpr decltype(auto) build_vtable()
 		{
-			return build_vtable<Concept>(std::make_index_sequence<Members<Inspector>::size>{});
+			return build_vtable<Concept>(
+				std::make_index_sequence<Members<Inspector>::size>{});
 		}
 
-		template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-		static constexpr decltype(auto) get_vtable_entry()
+		template <typename Type, auto Candidate, 
+				  typename Ret, typename Any, typename... Args>
+		static constexpr auto get_vtable_entry(Ret(*)(Any&, Args...))
 		{
 			return +[](Any& any, Args... args)
 			{
-				return std::invoke(Candidate, std::any_cast<Type>(any), std::forward<Args>(args)...);
+				return std::invoke(
+					Candidate,
+					std::any_cast<Type>(any),
+					std::forward<Args>(args)...);
 			};
 		}
 
-		template <typename Type, auto Candidate, typename Ret, typename Any, typename... Args>
-		static constexpr auto get_vtable_entry(Ret(*)(Any&, Args...))
-		{
-			return get_vtable_entry<Type, Candidate, Ret, Any, Args...>();
-		}
-
 		template <typename Type, std::size_t... Index>
-		static constexpr decltype(auto) get_vtable(std::index_sequence<Index...>)
+		static constexpr decltype(auto) 
+		get_vtable(std::index_sequence<Index...>)
 		{
 			using Table = vtable<Concept>::type;
 
@@ -125,7 +126,9 @@ namespace vecl
 		static constexpr decltype(auto) get_ptr()
 		{
 			using Members = Concept:: template Members<Type>;
-			static constexpr auto vtable = get_vtable<Type>(std::make_index_sequence<Members::size>{});
+
+			static constexpr auto vtable = 
+				get_vtable<Type>(std::make_index_sequence<Members::size>{});
 
 			return &vtable;
 		}
@@ -145,15 +148,19 @@ namespace vecl
 		friend decltype(auto) poly_call(Poly&&, Args&& ...);
 
 		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(const poly_base& self, Args&& ...args) const
+		[[nodiscard]] decltype(auto) 
+		invoke(const poly_base& self, Args&& ...args) const
 		{
-			return static_cast<const Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
+			return static_cast<const Poly&>(self).
+				invoke<Member>(std::forward<Args>(args)...);
 		}
 
 		template <auto Member, typename... Args>
-		[[nodiscard]] decltype(auto) invoke(poly_base& self, Args&& ...args)
+		[[nodiscard]] decltype(auto) 
+		invoke(poly_base& self, Args&& ...args)
 		{
-			return static_cast<Poly&>(self).invoke<Member>(std::forward<Args>(args)...);
+			return static_cast<Poly&>(self).
+				invoke<Member>(std::forward<Args>(args)...);
 		}
 	};
 	
@@ -171,13 +178,15 @@ namespace vecl
 		template <auto Member, typename... Args>
 		[[nodiscard]] decltype(auto) invoke(Args&& ...args)
 		{
-			return std::get<Member>(*_vtable_ptr)(_underlying, std::forward<Args>(args)...);
+			return std::get<Member>(*_vtable_ptr)
+				(_underlying, std::forward<Args>(args)...);
 		}
 
 		template <auto Member, typename... Args>
 		[[nodiscard]] decltype(auto) invoke(Args&& ...args) const
 		{
-			return std::get<Member>(*_vtable_ptr)(_underlying, std::forward<Args>(args)...);
+			return std::get<Member>(*_vtable_ptr)
+				(_underlying, std::forward<Args>(args)...);
 		}
 
 	public:
