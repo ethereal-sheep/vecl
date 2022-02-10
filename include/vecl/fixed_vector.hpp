@@ -23,14 +23,33 @@ namespace vecl
 	template<typename T, size_t N, bool Strict = true>
 	class fixed_vector 
 	{
-		/**
-		 * @brief Destroys the elements in a given range.
-		 */
-		constexpr void _destroy_range(T* s, T* e) VECL_NOEXCEPT
+		template<typename It>
+		static constexpr void _uninitialized_copy(It s, It e, T* begin)
 		{
-			if constexpr (!std::is_trivially_destructible<T>::value)
-				while (s != e) (--e)->~value_type();
+			for (; s != e; ++begin, ++s)
+				std::construct_at(begin, *s);
 		}
+		template<typename It>
+		static constexpr void _uninitialized_move(It s, It e, T* begin)
+		{
+			for (; s != e; ++begin, ++s)
+				std::construct_at(begin, std::move(*s));
+		}
+
+		static constexpr void _uninitialized_fill_n(T* begin, size_t n, const T& value)
+		{
+			for (; n--; ++begin)
+				std::construct_at(begin, value);
+		}
+		static constexpr void _uninitialized_default_construct_n(T* begin, size_t n)
+		{
+			if constexpr (!std::is_trivially_default_constructible_v<T>)
+			{
+				for (; n > 0; ++begin, --n)
+					std::construct_at(begin);
+			}
+		}
+
 
 		/**
 		 * @return true if ref is in the range.
@@ -210,7 +229,7 @@ namespace vecl
 			if (&other == this) return *this;
 			// else we just clear and move all the stuff from other
 			clear();
-			std::uninitialized_move(other.begin(), other.end(), end());
+			_uninitialized_move(other.begin(), other.end(), end());
 			_size = other.size();
 			other._size = 0;
 			return *this;
@@ -251,7 +270,7 @@ namespace vecl
 			std::fill_n(begin(), std::min(ele_n, size()), value);
 			// and either construct more elements at the end
 			if (ele_n > this->size())
-				std::uninitialized_fill_n(end(), ele_n - size(), value);
+				_uninitialized_fill_n(end(), ele_n - size(), value);
 			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
 				std::destroy(begin() + ele_n, end());
@@ -435,7 +454,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr iterator begin() VECL_NOEXCEPT
 		{
-			return (iterator)(_buffer);
+			return _buffer.data();
 		}
 
 		/**
@@ -444,7 +463,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr iterator end() VECL_NOEXCEPT
 		{
-			return (iterator)(_buffer) + _size;
+			return _buffer.data() + _size;
 		}
 		/**
 		 * @brief Standard Iterable Object boilerplate.
@@ -452,7 +471,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr const_iterator begin() const VECL_NOEXCEPT
 		{
-			return (const_iterator)(_buffer);
+			return _buffer.data();
 		}
 
 		/**
@@ -461,7 +480,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr const_iterator end() const VECL_NOEXCEPT
 		{
-			return (const_iterator)(_buffer) + _size;
+			return _buffer.data() + _size;
 		}
 
 		/**
@@ -633,7 +652,7 @@ namespace vecl
 				else ele_n = spare(); // if not strict we just fill spare
 			}
 
-			std::uninitialized_copy(from, from + ele_n, end());
+			_uninitialized_copy(from, from + ele_n, end());
 			_size += ele_n;
 		}
 
@@ -656,7 +675,7 @@ namespace vecl
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
-			std::uninitialized_fill_n(end(), ele_n, ele); 
+			_uninitialized_fill_n(end(), ele_n, ele); 
 			_size += ele_n;
 		}
 
@@ -725,7 +744,7 @@ namespace vecl
 			}
 
 			// we move construct the back element to the uninitialized memory
-			new ((void*)end()) T(std::move(back()));
+			std::construct_at(end(), std::move(back()));
 			// then we can move assign the rest of them one step to the right
 			std::move_backward(it, end() - 1, end());
 			++_size;
@@ -817,7 +836,7 @@ namespace vecl
 			// move last overwrite_n number of elements to uninitialized memory
 			// we know it is definitely uninitialized since 
 			// overwrite_n < ele_n
-			std::uninitialized_move(it, old, end() - overwrite_n);
+			_uninitialized_move(it, old, end() - overwrite_n);
 
 			// if our reference was in the range of the move
 			// we adjust the position of the ptr
@@ -827,7 +846,7 @@ namespace vecl
 			// fill over existing elements
 			// over uninitialized fill unfilled space
 			std::fill_n(it, overwrite_n, *ele_p);
-			std::uninitialized_fill_n(old, ele_n - overwrite_n, *ele_p);
+			_uninitialized_fill_n(old, ele_n - overwrite_n, *ele_p);
 
 			return it;
 		}
@@ -911,7 +930,7 @@ namespace vecl
 					// move last overwrite_n number of elements to unintialized 
 					// memory; we know it is definitely uninitialized since 
 					// overwrite_n < ele_n
-					std::uninitialized_move(it, old, end() - overwrite_n);
+					_uninitialized_move(it, old, end() - overwrite_n);
 
 					// piecewise copy and move from both parts of the range
 					// the freed up space in the middle is only partially 
@@ -934,7 +953,7 @@ namespace vecl
 						// ele_n away
 						if (from == it)
 							std::advance(from, ele_n);
-						new ((void*)curr) value_type(*from);
+						std::construct_at(curr, *from);
 					}
 
 					return it;
@@ -971,7 +990,7 @@ namespace vecl
 			// move last overwrite_n number of elements to uninitialized memory
 			// we know it is definitely uninitialized since 
 			// overwrite_n < ele_n
-			std::uninitialized_move(it, old, end() - overwrite_n);
+			_uninitialized_move(it, old, end() - overwrite_n);
 
 			// we do not need to check if our reference is in the range since
 			// by this point, it is impossible to be
@@ -984,7 +1003,7 @@ namespace vecl
 				*curr = *from;
 
 			// and construct at the initialized memory
-			std::uninitialized_copy(from, to, old);
+			_uninitialized_copy(from, to, old);
 
 			return it;
 		}
@@ -1078,13 +1097,11 @@ namespace vecl
 			if (size() >= N)
 			{
 				if constexpr (Strict)
-					throw std::length_error(
-						"max_size exceeded in fixed_vector"
-						);
+					VECL_ASSERT(false, "max_size exceeded in fixed_vector");
 				else return;
 			}
 
-			new ((void*)end()) value_type(std::move(ele));
+			std::construct_at(end(), std::move(ele));
 			++_size;
 		}
 
@@ -1117,7 +1134,7 @@ namespace vecl
 				else return back();
 			}
 
-			new ((void*)end()) value_type(std::forward<Args>(args)...);
+			std::construct_at(end(), std::forward<Args>(args)...);
 			++_size;
 			return back();
 		}
@@ -1151,7 +1168,7 @@ namespace vecl
 			if (size() > other.size())
 			{
 				size_type diff = size() - other.size();
-				std::uninitialized_move(begin() + shared_n, end(), other.end());
+				_uninitialized_move(begin() + shared_n, end(), other.end());
 				other._size += diff;
 
 				std::destroy(begin() + shared_n, end());
@@ -1160,7 +1177,7 @@ namespace vecl
 			else if (size() < other.size())
 			{
 				size_type diff = other.size() - size();
-				std::uninitialized_move(other.begin() + shared_n, other.end(), end());
+				_uninitialized_move(other.begin() + shared_n, other.end(), end());
 				_size += diff;
 
 				std::destroy(other.begin() + shared_n, other.end());
@@ -1180,7 +1197,63 @@ namespace vecl
 		}
 
 	private:
-		alignas(T) char _buffer[N * sizeof(T)];
+
+
+		/**
+		 * @brief array of uninitialized memory
+		 */
+		template<typename T, size_t N>
+		class uninitialized_array 
+		{
+		public:
+
+			constexpr uninitialized_array()
+			{
+				if constexpr (_is_sufficiently_trivial)
+					if(std::is_constant_evaluated())
+						for (int i = 0; i < N; ++i)
+							_storage[i] = T();
+			}
+
+			/**
+			 * @brief Direct access to storage
+			 */
+			constexpr const T* data() const VECL_NOEXCEPT
+			{
+				if constexpr (_is_sufficiently_trivial)
+					return static_cast<const T*>(_storage.data());
+				else
+					return reinterpret_cast<const T*>(std::addressof(_storage));
+			}
+
+			/**
+			 * @brief Direct access to storage
+			 */
+			constexpr T* data() VECL_NOEXCEPT
+			{
+				if constexpr (_is_sufficiently_trivial)
+					return static_cast<T*>(_storage.data());
+				else
+					return reinterpret_cast<T*>(std::addressof(_storage));
+			}
+
+		private:
+			static constexpr bool _is_sufficiently_trivial = 
+				std::is_trivially_default_constructible_v<T> && std::is_trivially_destructible_v<T>;
+
+			/**
+			 * @deprecated std::aligned_storage_t deprecated in c++23
+			 */
+			using storage_type = std::conditional_t<
+				_is_sufficiently_trivial,
+				std::array<T, N>,
+				std::aligned_storage_t<N * sizeof(T), alignof(T)>
+			>;
+
+			VECL_NO_UNIQUE_ADDRESS storage_type _storage;
+		};
+
+		uninitialized_array<T, N> _buffer;
 		size_type _size = 0;
 	};
 

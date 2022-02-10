@@ -65,7 +65,7 @@ TEST(FIXED_VECTOR, il_constructor) {
 
 TEST(FIXED_VECTOR, object_destruction) {
 
-	vecl::fixed_vector<test, 32> a{test("1"), test("2")};
+	vecl::fixed_vector<test, 32> a{test("1")};
 	a.clear();
 }
 
@@ -746,15 +746,38 @@ TEST(FIXED_VECTOR, swap) {
 
 }
 
+constexpr auto create_fixed() {
 
-constexpr vecl::fixed_vector<char, 5> create_fixed() {
-	vecl::fixed_vector<char, 5> a;
-	a = { 0,1,2,3,4 };
+	vecl::fixed_vector<int, 50> a;
+
+	a.push_back(0);
+	a.push_back(1);
+
+	a.append({ 2,3,4,5,6,7,8 });
+
+
+	return a;
+}
+
+constexpr auto create_array() {
+
+	constexpr auto f = create_fixed();
+
+	std::array<int, f.size()> a;
+
+	for (int i = 0; i < f.size(); ++i)
+		a[i] = f[i];
+
 	return a;
 }
 
 TEST(FIXED_VECTOR, pointer_test) {
 
-	vecl::fixed_vector<int, 5> a;
-	ASSERT_EQ((void*)&a, (void*)a.begin());
+	constexpr auto a = create_array();
+	constexpr auto f = create_fixed();
+
+	for(int i = 0; i < a.size(); ++i)
+		ASSERT_EQ(a[i], f[i]);
+
+
 }
