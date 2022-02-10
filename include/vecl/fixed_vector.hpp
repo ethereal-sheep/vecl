@@ -254,7 +254,7 @@ namespace vecl
 				std::uninitialized_fill_n(end(), ele_n - size(), value);
 			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
-				_destroy_range(begin() + ele_n, end());
+				std::destroy(begin() + ele_n, end());
 
 			// and update our size
 			_size = ele_n;
@@ -285,7 +285,7 @@ namespace vecl
 				std::uninitialized_default_construct_n(end(), ele_n - size());
 			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
-				_destroy_range(begin() + ele_n, end());
+				std::destroy(begin() + ele_n, end());
 
 			// and update our size
 			_size = ele_n;
@@ -608,7 +608,7 @@ namespace vecl
 		 */
 		constexpr void clear() VECL_NOEXCEPT
 		{
-			_destroy_range(begin(), end());
+			std::destroy(begin(), end());
 			_size = 0;
 		}
 
@@ -1061,7 +1061,7 @@ namespace vecl
 			// just move left and destroy
 			iterator last = std::move(to, end(), from);
 
-			_destroy_range(last, end());
+			std::destroy(last, end());
 			_size -= std::distance(from, to);
 
 			return from;
@@ -1154,7 +1154,7 @@ namespace vecl
 				std::uninitialized_move(begin() + shared_n, end(), other.end());
 				other._size += diff;
 
-				_destroy_range(begin() + shared_n, end());
+				std::destroy(begin() + shared_n, end());
 				_size = shared_n;
 			}
 			else if (size() < other.size())
@@ -1163,7 +1163,7 @@ namespace vecl
 				std::uninitialized_move(other.begin() + shared_n, other.end(), end());
 				_size += diff;
 
-				_destroy_range(other.begin() + shared_n, other.end());
+				std::destroy(other.begin() + shared_n, other.end());
 				other._size = shared_n;
 			}
 		}
