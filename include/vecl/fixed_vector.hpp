@@ -4,7 +4,8 @@
 #include "config/config.h"
 #include <iterator> // advance, distance
 #include <stdexcept> // length_error
-#include <memory> // uninitialized_move, uninitialized_copy 
+#include <memory> // uninitialized_move, uninitialized_copy
+#include <array> // array
 
 namespace vecl
 {
@@ -50,15 +51,14 @@ namespace vecl
 			}
 		}
 
-
 		/**
 		 * @return true if ref is in the range.
 		 */
-		constexpr bool _is_reference_in_range(
+		static constexpr bool _is_reference_in_range(
 			const T* ref, 
 			const T* from, 
 			const T* to
-		) const
+		)
 		{
 			std::less<> less;
 			return !less(ref, from) && less(ref, to);
