@@ -32,38 +32,27 @@ of `stl` containers should also be a goal in the forseeable future.
 
 ## Supported Structures
 
-### Containers
-Current container support in the library:
 
-- Sparse Set
-- Sparse Map
-- Fixed Vector
-- Constexpr Vector
-- Small Vector
-- Pipes
+ # Documentation 
+Documentation regarding `vecl` containers can be found in the [docs](docs) 
+folder. You may also use the following links to quickly access the required
+documentation:
+| Contiguous | Hybrid | Events | Misc |
+|------------|--------|--------|------|
+|[Fixed Vector](docs/fixed_vector.md)|[Sparse Set](docs/sparse_set.md)|[Broadcast](docs/broadcast.md)|[Pipes](docs/pipes.md)
+|[Constexpr Vector](docs/constexpr_vector.md)|[Sparse Map](docs/sparse_map.md)|[Publisher](docs/publisher.md)|[Enumerate](docs/enumerate.md)
+|[Small Vector](docs/small_vector.md)|[Set Vector](docs/set_vector.md)||[Memory](docs/memory.md)
 
-### Events
-Current event dispatcher support in the library:
+Internal code are also documented in a doxygen style, and can be used as a
+reference when writing code.
 
-- Broadcast
-- Publisher
-
-### Memory
-Current memory extensions for polymorphic allocators:
-
-- Debug (single and multi-threaded)
-- Malloc
-- Aligned Alloc
-
-### Utility
-- Enumerate
-
-### To Do
+## To Do
 Current todo list sorted by priority:
 
 1. [X] Deprecate Ranges/Views and replace with Pipes
    - [ ] Rethink pipes usage
-2. [X] Sparse Set
+2. [X] Sparse Set / Spare Map / Set Vector 
+   - [ ] Remove-If
    - [ ] Extend set operations for:
       - [ ] & and &= operator for union
       - [ ] | and |= operator for intersection
@@ -72,7 +61,6 @@ Current todo list sorted by priority:
    - [X] Small Vector
    - [ ] Small Set
    - [ ] Small Map
-   - [ ] SBO for existing DS
 3. [ ] Lock-Free
    - [ ] SPSC Lock-Free Queue
    - [ ] SPSC Lock-Free Stack
@@ -83,25 +71,6 @@ Current todo list sorted by priority:
 6. [ ] Thread Pool
 7. [ ] Adjacency List + Graph Algorithms
 
-
- # Documentation
-Documentation regarding `vecl` containers can be found in the [docs](docs) 
-folder. You may also use the following links to quickly access the required
-documentation:
-
-1. [Sparse Set](docs/sparse_set.md)
-2. [Sparse Map](docs/sparse_map.md)
-3. [Fixed Vector](docs/fixed_vector.md)
-3. [Constexpr Vector](docs/constexpr_vector.md)
-4. [Small Vector](docs/small_vector.md)
-5. [Pipes](docs/pipes.md)
-6. [Broadcast](docs/broadcast.md)
-7. [Publisher](docs/publisher.md)
-8. [Memory](docs/memory.md)
-9. [Enumerate](docs/enumerate.md)
-
-Internal code are also documented in a doxygen style, and can be used as a
-reference when writing code.
 
  # Tests
 Unit tests in `vecl` uses [googletest](https://github.com/google/googletest) 
