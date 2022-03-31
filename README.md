@@ -30,9 +30,6 @@ The library also uses the standard library for underlying container support
 like `std::vector` and `std::unordered_map` but creating `vecl` implementations
 of `stl` containers should also be a goal in the forseeable future.
 
-## Supported Structures
-
-
  # Documentation 
 Documentation regarding `vecl` containers can be found in the [docs](docs) 
 folder. You may also use the following links to quickly access the required
