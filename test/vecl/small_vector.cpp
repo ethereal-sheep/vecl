@@ -729,38 +729,38 @@ TEST(SMALL_VECTOR, insert_iterator_range) {
 
 TEST(SMALL_VECTOR, insert_iterator_range_test) {
 
-	auto insert = [](auto& a, int it, int from, int to) {
-		a.insert(a.begin() + it, a.begin() + from, a.begin() + to);
-	};
+	// auto insert = [](auto& a, int it, int from, int to) {
+	// 	a.insert(a.begin() + it, a.begin() + from, a.begin() + to);
+	// };
 
-	auto equal = [](auto& a, auto& b) {
-		if (a.size() != b.size()) return false;
+	// auto equal = [](auto& a, auto& b) {
+	// 	if (a.size() != b.size()) return false;
 
-		for (auto i = 0; i < (int)a.size(); ++i)
-			if (a[i] != b[i])
-				return false;
-		return true;
-	};
+	// 	for (auto i = 0; i < (int)a.size(); ++i)
+	// 		if (a[i] != b[i])
+	// 			return false;
+	// 	return true;
+	// };
 
-	auto test_insert = [&](int it, int from, int to) {
+	// auto test_insert = [&](int it, int from, int to) {
 
-		auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-		vecl::small_vector<test, 16> a{ il.begin(), il.end() };
-		std::vector<test> b{ il.begin(), il.end() };
+	// 	auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
+	// 	vecl::small_vector<test, 16> a{ il.begin(), il.end() };
+	// 	std::vector<test> b{ il.begin(), il.end() };
 
-		insert(a, it, from, to);
-		insert(b, it, from, to);
+	// 	insert(a, it, from, to);
+	// 	insert(b, it, from, to);
 
-		/*print(a);
+	// 	/*print(a);
 
-		std::cout << "\nKilling fv:\n";
-		a.clear();
-		std::cout << "\nKilling v:\n";
-		b.clear();
-		std::cout << "\nKilling il:\n";*/
+	// 	std::cout << "\nKilling fv:\n";
+	// 	a.clear();
+	// 	std::cout << "\nKilling v:\n";
+	// 	b.clear();
+	// 	std::cout << "\nKilling il:\n";*/
 
-		ASSERT_TRUE(equal(a, b));
-	};
+	// 	ASSERT_TRUE(equal(a, b));
+	// };
 
 	// test_insert(0, 1, 2);
 	// test_insert(2, 1, 6);
@@ -772,37 +772,37 @@ TEST(SMALL_VECTOR, insert_iterator_range_test) {
 
 TEST(SMALL_VECTOR, insert_iterator_external_test) {
 
-	auto insert = [](auto& a, int it, auto from, auto to) {
-		a.insert(a.begin() + it, from, to);
-	};
+	// auto insert = [](auto& a, int it, auto from, auto to) {
+	// 	a.insert(a.begin() + it, from, to);
+	// };
 
-	auto equal = [](auto& a, auto& b) {
-		if (a.size() != b.size()) return false;
+	// auto equal = [](auto& a, auto& b) {
+	// 	if (a.size() != b.size()) return false;
 
-		for (auto i = 0; i < (int)a.size(); ++i)
-			if (a[i] != b[i])
-				return false;
-		return true;
-	};
+	// 	for (auto i = 0; i < (int)a.size(); ++i)
+	// 		if (a[i] != b[i])
+	// 			return false;
+	// 	return true;
+	// };
 
-	auto test_insert = [&](int it, int from, int to) {
+	// auto test_insert = [&](int it, int from, int to) {
 
-		auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-		vecl::small_vector<test, 16> a{ il.begin(), il.end() };
-		std::vector<test> b{ il.begin(), il.end() };
+	// 	auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
+	// 	vecl::small_vector<test, 16> a{ il.begin(), il.end() };
+	// 	std::vector<test> b{ il.begin(), il.end() };
 
-		insert(a, it, il.begin() + from, il.begin() + to);
-		insert(b, it, il.begin() + from, il.begin() + to);
+	// 	insert(a, it, il.begin() + from, il.begin() + to);
+	// 	insert(b, it, il.begin() + from, il.begin() + to);
 
-		/*print(a);
-		std::cout << "\nKilling fv:\n";
-		a.clear();
-		std::cout << "\nKilling v:\n";
-		b.clear();
-		std::cout << "\nKilling il:\n";*/
+	// 	/*print(a);
+	// 	std::cout << "\nKilling fv:\n";
+	// 	a.clear();
+	// 	std::cout << "\nKilling v:\n";
+	// 	b.clear();
+	// 	std::cout << "\nKilling il:\n";*/
 
-		ASSERT_TRUE(equal(a, b));
-	};
+	// 	ASSERT_TRUE(equal(a, b));
+	// };
 
 	// test_insert(0, 1, 2);
 	// test_insert(2, 1, 1);

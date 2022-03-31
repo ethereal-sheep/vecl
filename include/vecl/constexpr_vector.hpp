@@ -1,23 +1,23 @@
-#ifndef VECL_FIXED_VECTOR_H
-#define VECL_FIXED_VECTOR_H
+#ifndef VECL_CONSTEXPR_VECTOR_H
+#define VECL_CONSTEXPR_VECTOR_H
 
 #include "config/config.h"
+#include "uninitialized_array.hpp"
 #include <iterator> // advance, distance
 #include <stdexcept> // length_error
-#include <memory> // uninitialized_move, uninitialized_copy 
 
 namespace vecl
 {
 	/**
-	 * @brief A Fixed Vector is an array with vector-like interface.
-	 *
-	 * Fixed vector has been reverted to the non compile time capable interface.
-	 * This is mainly due to the runtime performance hit observed after making
-	 * the vector compile time capable. As such, the compile time interface has been 
-	 * moved to a new container named constexpr vector.
+	 * @brief A Constexpr Vector is an array with vector-like interface and usable in compile-time.
 	 * 
+	 * The constexpr vector is the efforts of forcing the previous fixed vector to be usable in compile time.
+	 * Since a hit to the performance of the fixed vector has been observed (slower than small vector),
+	 * the decision to remodel the compile time vector to constexpr vector was made. Fixed vector
+	 * has also since been reverted.
+	 *
 	 * Since the buffer is always stored on stack, we can expect much faster
-	 * operations with a vecl::fixed_vector as compared to a std::vector.
+	 * operations with a vecl::constexpr_vector as compared to a std::vector.
 	 *
 	 * It is useful for when an upper bound for the size can be determined.
 	 *
@@ -26,16 +26,17 @@ namespace vecl
 	 * @tparam Strict false for no throw on overflow
 	 */
 	template<typename T, size_t N, bool Strict = true>
-	class fixed_vector
+	class constexpr_vector
 	{
+
 		/**
 		 * @return true if ref is in the range.
 		 */
-		constexpr bool _is_reference_in_range(
+		static constexpr bool _is_reference_in_range(
 			const T* ref,
 			const T* from,
 			const T* to
-		) const
+		)
 		{
 			std::less<> less;
 			return !less(ref, from) && less(ref, to);
@@ -109,12 +110,12 @@ namespace vecl
 		 /**
 		  * @brief Default Constructor.
 		  */
-		constexpr fixed_vector() = default;
+		constexpr constexpr_vector() = default;
 
 		/**
 		* @brief Destructor.
 		*/
-		constexpr ~fixed_vector()
+		constexpr ~constexpr_vector()
 		{
 			clear();
 		}
@@ -125,7 +126,7 @@ namespace vecl
 		 * @param ele_n Number of elements
 		 * @param ele Element to fill by const-reference
 		 */
-		constexpr explicit fixed_vector(
+		constexpr explicit constexpr_vector(
 			size_t ele_n,
 			const value_type& ele
 		)
@@ -139,7 +140,7 @@ namespace vecl
 		 * @param ele_n Number of elements
 		 * @param ele Element to fill by const-reference
 		 */
-		constexpr explicit fixed_vector(
+		constexpr explicit constexpr_vector(
 			size_t ele_n
 		)
 		{
@@ -155,7 +156,7 @@ namespace vecl
 		 * @param to Iterator to end of range.
 		 */
 		template <std::input_iterator It>
-		constexpr explicit fixed_vector(It from, It to)
+		constexpr explicit constexpr_vector(It from, It to)
 		{
 			append(from, to);
 		}
@@ -163,7 +164,7 @@ namespace vecl
 		/**
 		 * @brief Copy Constructor.
 		 */
-		constexpr fixed_vector(const fixed_vector& other)
+		constexpr constexpr_vector(const constexpr_vector& other)
 		{
 			operator=(other);
 		}
@@ -171,7 +172,7 @@ namespace vecl
 		/**
 		 * @brief Move Constructor.
 		 */
-		constexpr fixed_vector(fixed_vector&& other) VECL_NOEXCEPT
+		constexpr constexpr_vector(constexpr_vector&& other) VECL_NOEXCEPT
 		{
 			operator=(std::move(other));
 		}
@@ -181,7 +182,7 @@ namespace vecl
 		 *
 		 * @param il Initializer list.
 		 */
-		constexpr fixed_vector(std::initializer_list<T> il)
+		constexpr constexpr_vector(std::initializer_list<T> il)
 		{
 			assign(il);
 		}
@@ -189,7 +190,7 @@ namespace vecl
 		/**
 		 * @brief Copy-Assignment Operator.
 		 */
-		constexpr fixed_vector& operator=(const fixed_vector& other)
+		constexpr constexpr_vector& operator=(const constexpr_vector& other)
 		{
 			if (&other == this) return *this;
 
@@ -200,13 +201,13 @@ namespace vecl
 		/**
 		 * @brief Move-Assignment Operator.
 		 */
-		constexpr fixed_vector& operator=(fixed_vector&& other) VECL_NOEXCEPT
+		constexpr constexpr_vector& operator=(constexpr_vector&& other) VECL_NOEXCEPT
 		{
 			// if this is other we do nothing
 			if (&other == this) return *this;
 			// else we just clear and move all the stuff from other
 			clear();
-			std::uninitialized_move(other.begin(), other.end(), end());
+			_uninitialized_move(other.begin(), other.end(), end());
 			_size = other.size();
 			other._size = 0;
 			return *this;
@@ -217,7 +218,7 @@ namespace vecl
 		 *
 		 * @param il Initializer list.
 		 */
-		constexpr fixed_vector& operator=(std::initializer_list<T> il)
+		constexpr constexpr_vector& operator=(std::initializer_list<T> il)
 		{
 			assign(il);
 			return *this;
@@ -238,7 +239,7 @@ namespace vecl
 			if (ele_n > N) {
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else return;
 			}
@@ -247,7 +248,7 @@ namespace vecl
 			std::fill_n(begin(), std::min(ele_n, size()), value);
 			// and either construct more elements at the end
 			if (ele_n > this->size())
-				std::uninitialized_fill_n(end(), ele_n - size(), value);
+				_uninitialized_fill_n(end(), ele_n - size(), value);
 			// or destroy elements at the end to have size() == ele_n
 			else if (ele_n < this->size())
 				std::destroy(begin() + ele_n, end());
@@ -269,7 +270,7 @@ namespace vecl
 			if (ele_n > N) {
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else return;
 			}
@@ -316,7 +317,7 @@ namespace vecl
 		/**
 		 * @brief Copy assign.
 		 */
-		constexpr void assign(const fixed_vector& rhs)
+		constexpr void assign(const constexpr_vector& rhs)
 		{
 			assign(rhs.begin(), rhs.end());
 		}
@@ -431,7 +432,7 @@ namespace vecl
 		  */
 		VECL_NODISCARD constexpr iterator begin() VECL_NOEXCEPT
 		{
-			return (iterator)(_buffer);
+			return _buffer.data();
 		}
 
 		/**
@@ -440,7 +441,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr iterator end() VECL_NOEXCEPT
 		{
-			return (iterator)(_buffer)+_size;
+			return _buffer.data() + _size;
 		}
 		/**
 		 * @brief Standard Iterable Object boilerplate.
@@ -448,7 +449,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr const_iterator begin() const VECL_NOEXCEPT
 		{
-			return (const_iterator)(_buffer);
+			return _buffer.data();
 		}
 
 		/**
@@ -457,7 +458,7 @@ namespace vecl
 		 */
 		VECL_NODISCARD constexpr const_iterator end() const VECL_NOEXCEPT
 		{
-			return (const_iterator)(_buffer)+_size;
+			return _buffer.data() + _size;
 		}
 
 		/**
@@ -624,12 +625,12 @@ namespace vecl
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
 
-			std::uninitialized_copy(from, from + ele_n, end());
+			_uninitialized_copy(from, from + ele_n, end());
 			_size += ele_n;
 		}
 
@@ -648,11 +649,11 @@ namespace vecl
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
-			std::uninitialized_fill_n(end(), ele_n, ele);
+			_uninitialized_fill_n(end(), ele_n, ele);
 			_size += ele_n;
 		}
 
@@ -667,7 +668,7 @@ namespace vecl
 			if (ele_n > spare()) {
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
@@ -715,13 +716,13 @@ namespace vecl
 			{
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else return it;
 			}
 
 			// we move construct the back element to the uninitialized memory
-			new ((void*)end()) T(std::move(back()));
+			std::construct_at(end(), std::move(back()));
 			// then we can move assign the rest of them one step to the right
 			std::move_backward(it, end() - 1, end());
 			++_size;
@@ -776,7 +777,7 @@ namespace vecl
 			{
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
@@ -813,7 +814,7 @@ namespace vecl
 			// move last overwrite_n number of elements to uninitialized memory
 			// we know it is definitely uninitialized since 
 			// overwrite_n < ele_n
-			std::uninitialized_move(it, old, end() - overwrite_n);
+			_uninitialized_move(it, old, end() - overwrite_n);
 
 			// if our reference was in the range of the move
 			// we adjust the position of the ptr
@@ -823,7 +824,7 @@ namespace vecl
 			// fill over existing elements
 			// over uninitialized fill unfilled space
 			std::fill_n(it, overwrite_n, *ele_p);
-			std::uninitialized_fill_n(old, ele_n - overwrite_n, *ele_p);
+			_uninitialized_fill_n(old, ele_n - overwrite_n, *ele_p);
 
 			return it;
 		}
@@ -863,7 +864,7 @@ namespace vecl
 			{
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else ele_n = spare(); // if not strict we just fill spare
 			}
@@ -907,7 +908,7 @@ namespace vecl
 					// move last overwrite_n number of elements to unintialized 
 					// memory; we know it is definitely uninitialized since 
 					// overwrite_n < ele_n
-					std::uninitialized_move(it, old, end() - overwrite_n);
+					_uninitialized_move(it, old, end() - overwrite_n);
 
 					// piecewise copy and move from both parts of the range
 					// the freed up space in the middle is only partially 
@@ -930,7 +931,7 @@ namespace vecl
 						// ele_n away
 						if (from == it)
 							std::advance(from, ele_n);
-						new ((void*)curr) value_type(*from);
+						std::construct_at(curr, *from);
 					}
 
 					return it;
@@ -967,7 +968,7 @@ namespace vecl
 			// move last overwrite_n number of elements to uninitialized memory
 			// we know it is definitely uninitialized since 
 			// overwrite_n < ele_n
-			std::uninitialized_move(it, old, end() - overwrite_n);
+			_uninitialized_move(it, old, end() - overwrite_n);
 
 			// we do not need to check if our reference is in the range since
 			// by this point, it is impossible to be
@@ -980,7 +981,7 @@ namespace vecl
 				*curr = *from;
 
 			// and construct at the initialized memory
-			std::uninitialized_copy(from, to, old);
+			_uninitialized_copy(from, to, old);
 
 			return it;
 		}
@@ -1074,13 +1075,11 @@ namespace vecl
 			if (size() >= N)
 			{
 				if constexpr (Strict)
-					throw std::length_error(
-						"max_size exceeded in fixed_vector"
-					);
+					VECL_ASSERT(false, "max_size exceeded in constexpr_vector");
 				else return;
 			}
 
-			new ((void*)end()) value_type(std::move(ele));
+			std::construct_at(end(), std::move(ele));
 			++_size;
 		}
 
@@ -1108,12 +1107,12 @@ namespace vecl
 			{
 				if constexpr (Strict)
 					throw std::length_error(
-						"max_size exceeded in fixed_vector"
+						"max_size exceeded in constexpr_vector"
 					);
 				else return back();
 			}
 
-			new ((void*)end()) value_type(std::forward<Args>(args)...);
+			std::construct_at(end(), std::forward<Args>(args)...);
 			++_size;
 			return back();
 		}
@@ -1129,9 +1128,9 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Swaps the contents of two fixed_vectors.
+		 * @brief Swaps the contents of two constexpr_vectors.
 		 */
-		constexpr void swap(fixed_vector& other)
+		constexpr void swap(constexpr_vector& other)
 		{
 			if (&other == this) return;
 
@@ -1147,7 +1146,7 @@ namespace vecl
 			if (size() > other.size())
 			{
 				size_type diff = size() - other.size();
-				std::uninitialized_move(begin() + shared_n, end(), other.end());
+				_uninitialized_move(begin() + shared_n, end(), other.end());
 				other._size += diff;
 
 				std::destroy(begin() + shared_n, end());
@@ -1156,7 +1155,7 @@ namespace vecl
 			else if (size() < other.size())
 			{
 				size_type diff = other.size() - size();
-				std::uninitialized_move(other.begin() + shared_n, other.end(), end());
+				_uninitialized_move(other.begin() + shared_n, other.end(), end());
 				_size += diff;
 
 				std::destroy(other.begin() + shared_n, other.end());
@@ -1165,18 +1164,19 @@ namespace vecl
 		}
 
 		/**
-		 * @brief Swaps the contents of two fixed_vectors.
+		 * @brief Swaps the contents of two constexpr_vectors.
 		 */
 		friend inline void swap(
-			fixed_vector& lhs,
-			fixed_vector& rhs
+			constexpr_vector& lhs,
+			constexpr_vector& rhs
 		) VECL_NOEXCEPT
 		{
 			lhs.swap(rhs);
 		}
 
 	private:
-		alignas(T) char _buffer[N * sizeof(T)];
+
+		uninitialized_array<T, N> _buffer;
 		size_type _size = 0;
 	};
 
@@ -1184,7 +1184,7 @@ namespace vecl
 	 * @brief Specialize for 0 sized vector and disallow it.
 	 */
 	template<typename T>
-	class fixed_vector<T, 0>;
+	class constexpr_vector<T, 0>;
 
 }
 
@@ -1192,12 +1192,12 @@ namespace vecl
 namespace std
 {
 	/**
-	 * @brief Swaps the contents of two fixed_vectors.
+	 * @brief Swaps the contents of two constexpr_vectors.
 	 */
 	template<typename T, size_t N, bool S>
 	inline void swap(
-		vecl::fixed_vector<T, N, S>& lhs,
-		vecl::fixed_vector<T, N, S>& rhs
+		vecl::constexpr_vector<T, N, S>& lhs,
+		vecl::constexpr_vector<T, N, S>& rhs
 	) noexcept
 	{
 		lhs.swap(rhs);

@@ -1,34 +1,34 @@
 
-#include <vecl/fixed_vector.hpp>
+#include <vecl/constexpr_vector.hpp>
 #include <gtest/gtest.h>
 #include <array>
 
 struct test {
 	std::string id;
 	std::string s;
-	test(std::string i = "LOL") : id{i}, s{"Default"} {}
+	test(std::string i = "LOL") : id{ i }, s{ "Default" } {}
 	test(const test& rhs) : id{ rhs.id }, s{ "Copy" } {}
 	test& operator=(const test& rhs) { id = rhs.id; s = "Copy"; return *this; }
 	test(test&& rhs) noexcept : id{ std::move(rhs.id) }, s{ "Move" } {}
 	test& operator=(test&& rhs) noexcept { id = std::move(rhs.id); s = "Move"; return *this; }
-	~test() { 
+	~test() {
 		//std::cout << "Deleted " << s << " " << id << std::endl; 
 	}
 
 	bool operator==(const test& that) const {
 		return id == that.id;
 	}
-	
+
 };
 
-void print(const vecl::fixed_vector<int, 16>& a)
+void print(const vecl::constexpr_vector<int, 16>& a)
 {
 	for (auto i : a)
 		std::cout << i << " ";
 	std::cout << std::endl;
 }
 
-void print(const vecl::fixed_vector<test, 16>& a)
+void print(const vecl::constexpr_vector<test, 16>& a)
 {
 	for (auto& i : a)
 		std::cout << i.id << " ";
@@ -47,8 +47,8 @@ void print(const std::vector<int>& a)
 	std::cout << std::endl;
 }
 
-TEST(FIXED_VECTOR, default_constructor) {
-	vecl::fixed_vector<int, 32> a;
+TEST(CONSTEXPR_VECTOR, default_constructor) {
+	vecl::constexpr_vector<int, 32> a;
 
 	static_assert(a.max_size() == 32);
 	ASSERT_EQ((int)a.size(), 0);
@@ -56,22 +56,22 @@ TEST(FIXED_VECTOR, default_constructor) {
 	ASSERT_TRUE(a.empty());
 }
 
-TEST(FIXED_VECTOR, il_constructor) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, il_constructor) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_FALSE(a.empty());
 }
 
-TEST(FIXED_VECTOR, object_destruction) {
+TEST(CONSTEXPR_VECTOR, object_destruction) {
 
-	vecl::fixed_vector<test, 32> a{test("1")};
+	vecl::constexpr_vector<test, 32> a{ test("1") };
 	a.clear();
 }
 
-TEST(FIXED_VECTOR, element_access) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
-	const vecl::fixed_vector<int, 16> b{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, element_access) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
+	const vecl::constexpr_vector<int, 16> b{ 1,2,3 };
 
 	ASSERT_EQ(a[0], 1);
 	ASSERT_EQ(a.at(2), 3);
@@ -90,8 +90,8 @@ TEST(FIXED_VECTOR, element_access) {
 	ASSERT_EQ(a.back(), 3);
 }
 
-TEST(FIXED_VECTOR, il_assignment) {
-	vecl::fixed_vector<int, 16> a = { 1,2,3 };
+TEST(CONSTEXPR_VECTOR, il_assignment) {
+	vecl::constexpr_vector<int, 16> a = { 1,2,3 };
 
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_FALSE(a.empty());
@@ -103,16 +103,16 @@ TEST(FIXED_VECTOR, il_assignment) {
 	ASSERT_FALSE(a.empty());
 	ASSERT_EQ(a[0], 5);
 
-	vecl::fixed_vector<int, 1> b;
-	ASSERT_THROW(b.assign({1,2,3}), std::length_error);
+	vecl::constexpr_vector<int, 1> b;
+	ASSERT_THROW(b.assign({ 1,2,3 }), std::length_error);
 
-	vecl::fixed_vector<int, 1, false> c;
+	vecl::constexpr_vector<int, 1, false> c;
 	ASSERT_NO_THROW(c.assign({ 1,2,3 }));
 	ASSERT_EQ(c[0], 1);
 }
 
-TEST(FIXED_VECTOR, il_appending) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, il_appending) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_FALSE(a.empty());
@@ -125,9 +125,9 @@ TEST(FIXED_VECTOR, il_appending) {
 	ASSERT_EQ(a[4], 5);
 }
 
-TEST(FIXED_VECTOR, copy_constructor) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
-	vecl::fixed_vector<int, 16> b(a);
+TEST(CONSTEXPR_VECTOR, copy_constructor) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
+	vecl::constexpr_vector<int, 16> b(a);
 
 	ASSERT_EQ(b.size(), 3);
 	ASSERT_FALSE(b.empty());
@@ -135,18 +135,18 @@ TEST(FIXED_VECTOR, copy_constructor) {
 		ASSERT_EQ(b[i], a[i]);
 }
 
-TEST(FIXED_VECTOR, copy_assignment) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, copy_assignment) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 
 	{
-		vecl::fixed_vector<int, 16> b = a;
+		vecl::constexpr_vector<int, 16> b = a;
 		ASSERT_EQ(b.size(), 3);
 		ASSERT_FALSE(b.empty());
 		for (int i = 0; i < (int)(int)a.size(); ++i)
 			ASSERT_EQ(b[i], a[i]);
 	}
 	{
-		vecl::fixed_vector<int, 16> b;
+		vecl::constexpr_vector<int, 16> b;
 		b.assign(a);
 		ASSERT_EQ(b.size(), 3);
 		ASSERT_FALSE(b.empty());
@@ -155,10 +155,10 @@ TEST(FIXED_VECTOR, copy_assignment) {
 	}
 }
 
-TEST(FIXED_VECTOR, move_constructor) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
-	vecl::fixed_vector<int, 16> b(a);
-	vecl::fixed_vector<int, 16> c(std::move(b));
+TEST(CONSTEXPR_VECTOR, move_constructor) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
+	vecl::constexpr_vector<int, 16> b(a);
+	vecl::constexpr_vector<int, 16> c(std::move(b));
 
 	ASSERT_EQ(b.size(), 0);
 	ASSERT_TRUE(b.empty());
@@ -170,12 +170,12 @@ TEST(FIXED_VECTOR, move_constructor) {
 
 }
 
-TEST(FIXED_VECTOR, move_assignment) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, move_assignment) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 
 	{
-		vecl::fixed_vector<int, 16> b(a);
-		vecl::fixed_vector<int, 16> c = std::move(b);
+		vecl::constexpr_vector<int, 16> b(a);
+		vecl::constexpr_vector<int, 16> c = std::move(b);
 
 		ASSERT_EQ(b.size(), 0);
 		ASSERT_TRUE(b.empty());
@@ -187,16 +187,16 @@ TEST(FIXED_VECTOR, move_assignment) {
 	}
 }
 
-TEST(FIXED_VECTOR, explicit_constructor) {
-	vecl::fixed_vector<int, 16> a(5, 1);
+TEST(CONSTEXPR_VECTOR, explicit_constructor) {
+	vecl::constexpr_vector<int, 16> a(5, 1);
 	ASSERT_EQ((int)a.size(), 5);
 	ASSERT_FALSE(a.empty());
 	for (int i = 0; i < (int)a.size(); ++i)
 		ASSERT_EQ(a[i], 1);
 }
 
-TEST(FIXED_VECTOR, explicit_assignment) {
-	vecl::fixed_vector<int, 16> a;
+TEST(CONSTEXPR_VECTOR, explicit_assignment) {
+	vecl::constexpr_vector<int, 16> a;
 	a.assign(5, 1);
 	ASSERT_EQ((int)a.size(), 5);
 	ASSERT_FALSE(a.empty());
@@ -204,18 +204,18 @@ TEST(FIXED_VECTOR, explicit_assignment) {
 		ASSERT_EQ(a[i], 1);
 }
 
-TEST(FIXED_VECTOR, range_constructor) {
-	std::vector<int> b(5,1);
-	vecl::fixed_vector<int, 16> a(b.begin(), b.end());
+TEST(CONSTEXPR_VECTOR, range_constructor) {
+	std::vector<int> b(5, 1);
+	vecl::constexpr_vector<int, 16> a(b.begin(), b.end());
 
 	ASSERT_EQ((int)a.size(), b.size());
 	for (int i = 0; i < (int)a.size(); ++i)
 		ASSERT_EQ(a[i], b[i]);
 }
 
-TEST(FIXED_VECTOR, range_assignment) {
+TEST(CONSTEXPR_VECTOR, range_assignment) {
 	std::vector<int> b(5, 1);
-	vecl::fixed_vector<int, 16> a;
+	vecl::constexpr_vector<int, 16> a;
 	a.assign(b.begin(), b.end());
 
 	ASSERT_EQ((int)a.size(), b.size());
@@ -223,8 +223,8 @@ TEST(FIXED_VECTOR, range_assignment) {
 		ASSERT_EQ(a[i], b[i]);
 }
 
-TEST(FIXED_VECTOR, pop_back) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, pop_back) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_EQ(a.back(), 3);
 	a.pop_back();
@@ -234,8 +234,8 @@ TEST(FIXED_VECTOR, pop_back) {
 
 }
 
-TEST(FIXED_VECTOR, insert_one) {
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+TEST(CONSTEXPR_VECTOR, insert_one) {
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_EQ(a.back(), 3);
 
@@ -260,8 +260,8 @@ TEST(FIXED_VECTOR, insert_one) {
 
 }
 
-TEST(FIXED_VECTOR, insert_one_internal_move) {
-	vecl::fixed_vector<test, 16> a{ test("1"), test("1"), test("1") };
+TEST(CONSTEXPR_VECTOR, insert_one_internal_move) {
+	vecl::constexpr_vector<test, 16> a{ test("1"), test("1"), test("1") };
 	ASSERT_EQ((int)a.size(), 3);
 
 	auto it = a.insert(a.begin(), test("2"));
@@ -285,9 +285,9 @@ TEST(FIXED_VECTOR, insert_one_internal_move) {
 	//print(a);
 }
 
-TEST(FIXED_VECTOR, insert_many) {
+TEST(CONSTEXPR_VECTOR, insert_many) {
 
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_EQ(a.back(), 3);
 
@@ -311,9 +311,9 @@ TEST(FIXED_VECTOR, insert_many) {
 
 }
 
-TEST(FIXED_VECTOR, insert_many_internal_ref) {
+TEST(CONSTEXPR_VECTOR, insert_many_internal_ref) {
 
-	vecl::fixed_vector<int, 16> a{ 1,2,3 };
+	vecl::constexpr_vector<int, 16> a{ 1,2,3 };
 	ASSERT_EQ((int)a.size(), 3);
 	ASSERT_EQ(a.back(), 3);
 
@@ -327,8 +327,8 @@ TEST(FIXED_VECTOR, insert_many_internal_ref) {
 	//print(a);
 }
 
-TEST(FIXED_VECTOR, insert_many_internal_move) {
-	vecl::fixed_vector<test, 16> a{ test("1"), test("1"), test("3") };
+TEST(CONSTEXPR_VECTOR, insert_many_internal_move) {
+	vecl::constexpr_vector<test, 16> a{ test("1"), test("1"), test("3") };
 	ASSERT_EQ((int)a.size(), 3);
 
 	auto it = a.insert(a.begin(), 5, std::move(*(a.end() - 1)));
@@ -342,9 +342,9 @@ TEST(FIXED_VECTOR, insert_many_internal_move) {
 }
 
 
-TEST(FIXED_VECTOR, insert_iterator_range) {
+TEST(CONSTEXPR_VECTOR, insert_iterator_range) {
 
-	vecl::fixed_vector<int, 16> a{ 0,1,2,3,4,5 };
+	vecl::constexpr_vector<int, 16> a{ 0,1,2,3,4,5 };
 	std::vector<int> b{ 0,1,2,3,4,5 };
 
 	auto insert = [](auto& a) {
@@ -370,7 +370,7 @@ TEST(FIXED_VECTOR, insert_iterator_range) {
 
 }
 
-TEST(FIXED_VECTOR, insert_iterator_range_test) {
+TEST(CONSTEXPR_VECTOR, insert_iterator_range_test) {
 
 	// auto insert = [](auto& a, int it, int from, int to) {
 	// 	a.insert(a.begin() + it, a.begin() + from, a.begin() + to);
@@ -388,16 +388,14 @@ TEST(FIXED_VECTOR, insert_iterator_range_test) {
 	// auto test_insert = [&](int it, int from, int to) {
 
 	// 	auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-	// 	vecl::fixed_vector<test, 16> a{ il.begin(), il.end() };
+	// 	vecl::constexpr_vector<test, 16> a{ il.begin(), il.end() };
 	// 	std::vector<test> b{ il.begin(), il.end() };
 
 	// 	insert(a, it, from, to);
 	// 	insert(b, it, from, to);
 
-		
 	// 	print(a);
 	// 	print(b);
-		
 
 	// 	/*std::cout << "\nKilling fv:\n";
 	// 	a.clear();
@@ -416,7 +414,7 @@ TEST(FIXED_VECTOR, insert_iterator_range_test) {
 
 }
 
-TEST(FIXED_VECTOR, insert_iterator_external_test) {
+TEST(CONSTEXPR_VECTOR, insert_iterator_external_test) {
 
 	// auto insert = [](auto& a, int it, auto from, auto to) {
 	// 	a.insert(a.begin() + it, from, to);
@@ -434,7 +432,7 @@ TEST(FIXED_VECTOR, insert_iterator_external_test) {
 	// auto test_insert = [&](int it, int from, int to) {
 
 	// 	auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-	// 	vecl::fixed_vector<test, 16> a{ il.begin(), il.end() };
+	// 	vecl::constexpr_vector<test, 16> a{ il.begin(), il.end() };
 	// 	std::vector<test> b{ il.begin(), il.end() };
 
 	// 	insert(a, it, il.begin() + from, il.begin() + to);
@@ -458,7 +456,7 @@ TEST(FIXED_VECTOR, insert_iterator_external_test) {
 
 }
 
-TEST(FIXED_VECTOR, insert_iterator_il) {
+TEST(CONSTEXPR_VECTOR, insert_iterator_il) {
 
 	auto insert = [](auto& a, int it, auto& il) {
 		a.insert(a.begin() + it, il);
@@ -475,7 +473,7 @@ TEST(FIXED_VECTOR, insert_iterator_il) {
 
 	auto test_insert = [&](int it, auto& il) {
 
-		vecl::fixed_vector<test, 16> a{ il.begin(), il.end() };
+		vecl::constexpr_vector<test, 16> a{ il.begin(), il.end() };
 		std::vector<test> b{ il.begin(), il.end() };
 
 		insert(a, it, il);
@@ -511,9 +509,9 @@ TEST(FIXED_VECTOR, insert_iterator_il) {
 }
 
 
-TEST(FIXED_VECTOR, push_back) {
+TEST(CONSTEXPR_VECTOR, push_back) {
 
-	vecl::fixed_vector<test, 16> a;
+	vecl::constexpr_vector<test, 16> a;
 	auto size = (int)a.size();
 	test example{ "YO" };
 
@@ -531,9 +529,9 @@ TEST(FIXED_VECTOR, push_back) {
 
 }
 
-TEST(FIXED_VECTOR, emplace_back) {
+TEST(CONSTEXPR_VECTOR, emplace_back) {
 
-	vecl::fixed_vector<test, 16> a;
+	vecl::constexpr_vector<test, 16> a;
 	auto size = (int)a.size();
 	test example{ "YO" };
 
@@ -563,9 +561,9 @@ TEST(FIXED_VECTOR, emplace_back) {
 
 }
 
-TEST(FIXED_VECTOR, emplace) {
+TEST(CONSTEXPR_VECTOR, emplace) {
 
-	vecl::fixed_vector<test, 16> a{ test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
+	vecl::constexpr_vector<test, 16> a{ test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
 	auto size = (int)a.size();
 	test example{ "YO" };
 
@@ -592,7 +590,7 @@ TEST(FIXED_VECTOR, emplace) {
 	ASSERT_EQ(it->id, "LAST");
 }
 
-TEST(FIXED_VECTOR, erase_single) {
+TEST(CONSTEXPR_VECTOR, erase_single) {
 
 	auto erase = [](auto& a, auto it) {
 
@@ -611,7 +609,7 @@ TEST(FIXED_VECTOR, erase_single) {
 	auto test_erase = [&](unsigned int seed) {
 
 		auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-		vecl::fixed_vector<test, 16> a{ il.begin(), il.end() };
+		vecl::constexpr_vector<test, 16> a{ il.begin(), il.end() };
 		std::vector<test> b{ il.begin(), il.end() };
 
 		srand(seed);
@@ -636,7 +634,7 @@ TEST(FIXED_VECTOR, erase_single) {
 
 }
 
-TEST(FIXED_VECTOR, erase_range) {
+TEST(CONSTEXPR_VECTOR, erase_range) {
 
 	auto erase = [](auto& a, auto first, auto second) {
 		a.erase(a.begin() + first, a.begin() + second);
@@ -654,7 +652,7 @@ TEST(FIXED_VECTOR, erase_range) {
 	auto test_erase = [&](unsigned int seed) {
 
 		auto il = { test("0"), test("1"), test("2"), test("3"), test("4"), test("5") };
-		vecl::fixed_vector<test, 16> a{ il.begin(), il.end() };
+		vecl::constexpr_vector<test, 16> a{ il.begin(), il.end() };
 		std::vector<test> b{ il.begin(), il.end() };
 
 		srand(seed);
@@ -665,7 +663,7 @@ TEST(FIXED_VECTOR, erase_range) {
 			auto s = rand() % (int)a.size();
 
 			//std::cout << "erasing from " << std::min(f, s) << " to " << std::max(f, s) << std::endl;
-			
+
 			erase(a, std::min(f, s), std::max(f, s));
 			erase(b, std::min(f, s), std::max(f, s));
 
@@ -673,7 +671,7 @@ TEST(FIXED_VECTOR, erase_range) {
 
 			// std::cout << a.size() << "| a: ";
 			// print(a);
-			
+
 			// std::cout << a.size() << "| b: ";
 			// print(b);
 
@@ -689,11 +687,11 @@ TEST(FIXED_VECTOR, erase_range) {
 
 }
 
-TEST(FIXED_VECTOR, erase_remove) {
+TEST(CONSTEXPR_VECTOR, erase_remove) {
 
 	auto erase_remove = [](int c, unsigned seed) {
 
-		vecl::fixed_vector<int, 16> a;
+		vecl::constexpr_vector<int, 16> a;
 
 		srand(seed);
 		for (auto i = 0; i < 16; ++i)
@@ -712,7 +710,7 @@ TEST(FIXED_VECTOR, erase_remove) {
 	erase_remove(4, 264);
 }
 
-TEST(FIXED_VECTOR, swap) {
+TEST(CONSTEXPR_VECTOR, swap) {
 
 
 	auto equal = [](auto& a, auto& b) {
@@ -726,8 +724,8 @@ TEST(FIXED_VECTOR, swap) {
 
 	auto test_swap = [&](auto& il1, auto& il2) {
 
-		vecl::fixed_vector<test, 16> a1{ il1.begin(), il1.end() };
-		vecl::fixed_vector<test, 16> a2{ il2.begin(), il2.end() };
+		vecl::constexpr_vector<test, 16> a1{ il1.begin(), il1.end() };
+		vecl::constexpr_vector<test, 16> a2{ il2.begin(), il2.end() };
 		std::vector<test> b1{ il1.begin(), il1.end() };
 		std::vector<test> b2{ il2.begin(), il2.end() };
 
@@ -745,5 +743,56 @@ TEST(FIXED_VECTOR, swap) {
 	test_swap(il1, il2);
 	test_swap(il2, il3);
 	test_swap(il3, il1);
+
+}
+
+
+struct pts
+{
+	int x, y;
+
+	constexpr bool operator==(const pts& p) const
+	{
+		return x == p.x && y == p.y;
+	}
+
+	constexpr pts& operator=(const pts& p)
+	{
+		x = p.x, y = p.y;
+
+		return *this;
+	}
+};
+
+constexpr auto create_constexpr_vector() {
+
+	vecl::constexpr_vector<pts, 50> a;
+
+	a.push_back(pts{ 1,2 });
+	a.push_back(pts{ 3,4 });
+
+	return a;
+}
+
+constexpr auto create_array() {
+
+	constexpr auto f = create_constexpr_vector();
+
+	std::array<pts, f.size()> a;
+
+	for (int i = 0; i < (int)f.size(); ++i)
+		a[i] = f[i];
+
+	return a;
+}
+
+TEST(CONSTEXPR_VECTOR, pointer_test) {
+
+	constexpr auto a = create_array();
+	constexpr auto f = create_constexpr_vector();
+
+	for (int i = 0; i < (int)a.size(); ++i)
+		ASSERT_EQ(a[i], f[i]);
+
 
 }

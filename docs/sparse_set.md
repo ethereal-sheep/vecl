@@ -175,6 +175,8 @@ indefinitely. As such, `vecl::sparse_set` provides a function to resize the set.
 [^1]: Might have to find a better way to handle this behaviour since the 
 container is not in a valid state after the operation.
 
+## Const Iterators
+### Todo
 ## Sorting
 While the container allows random-access of its elements, the value
 of the key is important in maintaining the integrity of the container.

@@ -21,6 +21,10 @@
 #define VECL_UNLIKELY [[unlikely]]
 #endif
 
+#ifndef VECL_NO_UNIQUE_ADDRESS
+#define VECL_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#endif
+
 #ifdef VECL_DISABLE_ASSERT
 #undef VECL_ASSERT
 #define VECL_ASSERT(...) (void(0))

@@ -446,7 +446,7 @@ namespace vecl
 		{
 			return insert(key);
 		}
-
+		
 		/**
 		 * @brief Appends the key to the end of the container. If key is
 		 * invalid or exists in the container, nothing happens.
