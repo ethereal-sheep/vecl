@@ -38,6 +38,7 @@ Current container support in the library:
 - Sparse Set
 - Sparse Map
 - Fixed Vector
+- Constexpr Vector
 - Small Vector
 - Pipes
 
@@ -91,6 +92,7 @@ documentation:
 1. [Sparse Set](docs/sparse_set.md)
 2. [Sparse Map](docs/sparse_map.md)
 3. [Fixed Vector](docs/fixed_vector.md)
+3. [Constexpr Vector](docs/constexpr_vector.md)
 4. [Small Vector](docs/small_vector.md)
 5. [Pipes](docs/pipes.md)
 6. [Broadcast](docs/broadcast.md)
