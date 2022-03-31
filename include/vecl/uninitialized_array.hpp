@@ -50,7 +50,7 @@ namespace vecl
         {
             if constexpr (_is_sufficiently_trivial)
                 if (std::is_constant_evaluated())
-                    _uninitialized_fill_n(_storage.begin(), N, T{});
+                    _uninitialized_fill_n(_storage.data(), N, T{});
         }
 
         /**

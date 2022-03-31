@@ -343,6 +343,14 @@ namespace vecl
 			_vec.clear();
 		}
 
+		/**
+		 * @brief Takes the underlying vector.
+		 */
+		vector_type take_vector() VECL_NOEXCEPT
+		{
+			_set.clear();
+			return std::move(_vec);
+		}
 
 
 		/**

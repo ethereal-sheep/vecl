@@ -72,6 +72,8 @@ TEST(SET_VECTOR, insert) {
 	}
 }
 
+
+
 TEST(SET_VECTOR, find) {
 	vecl::set_vector<int> a;
 	{
@@ -148,6 +150,31 @@ TEST(SET_VECTOR, clear) {
 	ASSERT_EQ(a.count(1), 0);
 	ASSERT_EQ(a.count(999), 0);
 	ASSERT_EQ(a.count(1000), 0);
+}
+
+
+TEST(SET_VECTOR, take_vector) {
+
+	auto equal = [](auto& a, auto& b)
+	{
+		if (a.size() != b.size()) return false;
+
+		for (int i = 0; i < (int)a.size(); ++i)
+		{
+			if (a[i] != b[i]) return false;
+		}
+
+		return true;
+	};
+
+	std::vector<int> ref = { 1,2,3,4 };
+
+	vecl::set_vector<int> a{ ref.begin(), ref.end() };
+	auto v = a.take_vector();
+
+	ASSERT_TRUE(a.empty());
+	ASSERT_TRUE(v.size() == ref.size());
+	ASSERT_TRUE(equal(v,ref));
 }
 /*
 TEST(SET_VECTOR, equal) {
