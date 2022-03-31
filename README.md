@@ -12,15 +12,12 @@ library until the word may be used to describe it.
 
 ---
 # Table of Contents
-* [Introduction](#introduction)
-   * [Goals](#goals)
-   * [Supported Structures](#supported-structures)
+* [Goals](#goals)
 * [Documentation](#documentation)
 * [Tests](#tests)
 * [License](#license)
 
-# Introduction
-## Goals
+# Goals
 The goals of the project are to:
 - provide a multi-purpose set of containers with many use cases
 - widen knowledge on data structures and modern C++ techniques
