@@ -10,22 +10,41 @@ namespace vecl
 		static constexpr auto size = sizeof...(T);
 	};
 
-	template<std::size_t I, class T >
+	template<std::size_t I, typename T >
 	struct type_list_element;
 
 	// recursive case
-	template<std::size_t I, class Head, class... Tail >
+	template<std::size_t I, typename Head, typename... Tail >
 	struct type_list_element<I, type_list<Head, Tail...>>
 		: type_list_element<I - 1, type_list<Tail...>> { };
 
 	// base case
-	template<class Head, class... Tail >
+	template<typename Head, typename... Tail >
 	struct type_list_element<0, type_list<Head, Tail...>> {
 		using type = Head;
 	};
 
-	template <std::size_t I, class T>
+	template <std::size_t I, typename T>
 	using type_list_element_t = typename type_list_element<I, T>::type;
+
+
+	template<typename C, typename T>
+	struct contains {
+		static constexpr bool value = std::is_same_v<C,T>;
+	};
+
+	template<typename C>
+	struct contains<C, void>{
+		static constexpr bool value = false;
+	};
+
+	template<typename C, typename Head, typename... Tail>
+	struct contains<C, type_list<Head, Tail...>>  {
+		static constexpr bool value = std::is_same_v<C,Head> || contains<C, type_list<Tail...>>::value;
+	};
+
+	template<typename C, typename TList>
+	inline constexpr bool contains_v = contains<C, TList>::value;
 
 
 	template <typename F>
