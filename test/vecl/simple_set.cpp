@@ -47,108 +47,230 @@ TEST(SIMPLE_SET, constructor) {
 	ASSERT_EQ(a.size(), 0);
 }
 
-TEST(SIMPLE_SET, simple_buffer_test) {
-	vecl::simple_buffer<std::string> a(10, "123");
-	ASSERT_EQ(a.size(), 10);
 
-	vecl::simple_buffer<int*> b(20, nullptr);
+struct identity
+{
+	size_t operator()(int a) const { return a; }
+};
 
-	for (auto& i : b)
-	{
-		i = new int(1);
-	}
+TEST(SIMPLE_SET, insert_int) {
 
-	for (int i = 0; i < (int)b.size(); ++i)
-	{
-		ASSERT_EQ(*b[i], 1);
-	}
-	for (auto& i : b)
-	{
-		delete i;
-	}
 
-}
-
-TEST(SIMPLE_SET, stress_simple) {
 	vecl::simple_set<int> a;
-
-	for (auto i = 0; i < 10000; ++i)
 	{
-		a.insert(i);
+		auto b = a.insert(0);
+		ASSERT_EQ(b, true);
+		ASSERT_EQ(a.size(), 1);
+		ASSERT_EQ(a.count(0), 1);
 	}
-	for (auto i = 0; i < 10000; ++i)
 	{
-		ASSERT_TRUE(a.contains(i));
+		auto b = a.insert(0);
+		ASSERT_EQ(b, false);
+		ASSERT_EQ(a.size(), 1);
+		ASSERT_EQ(a.count(0), 1);
 	}
-}
-TEST(SIMPLE_SET, stress_simple_unordered_set) {
-	std::unordered_set<int> a;
-
-	for (auto i = 0; i < 10000; ++i)
 	{
-		a.insert(i);
-	}
-	for (auto i = 0; i < 10000; ++i)
-	{
-		ASSERT_TRUE(a.contains(i));
+		auto b = a.insert(1);
+		ASSERT_EQ(b, true);
+		ASSERT_EQ(a.size(), 2);
+		ASSERT_EQ(a.count(1), 1);
 	}
 }
+TEST(SIMPLE_SET, insert_string) {
 
 
-TEST(SIMPLE_SET, stress_string) {
-	vecl::simple_set<test> a;
-
-	for (auto i = 0; i < 100000; ++i)
+	vecl::simple_set<std::string> a;
 	{
-		a.insert(test(std::to_string(i)));
+		auto b = a.insert("0");
+		ASSERT_EQ(b, true);
+		ASSERT_EQ(a.size(), 1);
+		ASSERT_EQ(a.count("0"), 1);
 	}
-	for (auto i = 0; i < 100000; ++i)
 	{
-		ASSERT_TRUE(a.contains(test(std::to_string(i))));
+		auto b = a.insert("0");
+		ASSERT_EQ(b, false);
+		ASSERT_EQ(a.size(), 1);
+		ASSERT_EQ(a.count("0"), 1);
 	}
-}
-TEST(SIMPLE_SET, stress_string_unordered_set) {
-	std::unordered_set<test> a;
-
-	for (auto i = 0; i < 100000; ++i)
 	{
-		a.insert(test(std::to_string(i)));
-	}
-	for (auto i = 0; i < 100000; ++i)
-	{
-		ASSERT_TRUE(a.contains(test(std::to_string(i))));
+		auto b = a.insert("1");
+		ASSERT_EQ(b, true);
+		ASSERT_EQ(a.size(), 2);
+		ASSERT_EQ(a.count("1"), 1);
+		std::cout << a << std::endl;
 	}
 }
 
+TEST(SIMPLE_SET, erase) {
 
-TEST(SIMPLE_SET, range_constructor) {
-	std::vector<float> a;
-	int t = 50;
-	while (t--)
-		a.push_back(static_cast<float>(t));
 
-	vecl::simple_set<size_t> b(a.begin(), a.end());
-
-	ASSERT_EQ(b.size(), a.size());
-	for (auto i : a)
-		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
-
+	vecl::simple_set<int> a;
+	{
+		a.insert(0);
+		a.insert(1);
+		a.insert(2);
+		a.insert(3);
+		a.insert(4);
+		std::cout << a << std::endl;
+	}
+	{
+		a.erase(0);
+		ASSERT_EQ(a.count(0), 0);
+		std::cout << a << std::endl;
+	}
+	{
+		a.erase(1);
+		ASSERT_EQ(a.count(1), 0);
+		std::cout << a << std::endl;
+	}
 }
 
-TEST(SIMPLE_SET, capacity_range_constructor) {
-	std::vector<float> a;
-	int t = 50;
-	while (t--)
-		a.push_back(static_cast<float>(t));
 
-	vecl::simple_set<size_t> b(a.begin(), a.end(), 100);
+TEST(SIMPLE_SET, erase_string) {
 
-	ASSERT_EQ(b.capacity(), 100);
-	ASSERT_EQ(b.size(), a.size());
-	for (auto i : a)
-		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
 
+	vecl::simple_set<std::string> a;
+	{
+		a.insert("1");
+		a.insert("3");
+		a.insert("5");
+		a.insert("a");
+		a.insert("s");
+		a.insert("0");
+		a.insert("f");
+		a.insert("g");
+		std::cout << a << std::endl;
+	}
+	{
+		a.erase("0");
+		ASSERT_EQ(a.count("0"), 0);
+		std::cout << a << std::endl;
+	}
+	{
+		a.erase("1");
+		ASSERT_EQ(a.count("1"), 0);
+		std::cout << a << std::endl;
+	}
 }
+
+//TEST(SIMPLE_SET, simple_buffer_test) {
+//	vecl::simple_buffer<std::string> a(10, "123");
+//	ASSERT_EQ(a.size(), 10);
+//
+//	vecl::simple_buffer<int*> b(20, nullptr);
+//
+//	for (auto& i : b)
+//	{
+//		i = new int(1);
+//	}
+//
+//	for (int i = 0; i < (int)b.size(); ++i)
+//	{
+//		ASSERT_EQ(*b[i], 1);
+//	}
+//	for (auto& i : b)
+//	{
+//		delete i;
+//	}
+//
+//}
+
+//TEST(SIMPLE_SET, stress_simple) {
+//	vecl::simple_set<int> a;
+//
+//	for (auto i = 0; i < 10000; ++i)
+//	{
+//		a.insert(i);
+//	}
+//	for (auto i = 0; i < 5000; ++i)
+//	{
+//		a.erase(i);
+//	}
+//	for (auto i = 5001; i < 10000; ++i)
+//	{
+//		ASSERT_TRUE(a.contains(i));
+//	}
+//}
+//TEST(SIMPLE_SET, stress_simple_unordered_set) {
+//	std::unordered_set<int> a;
+//
+//	for (auto i = 0; i < 10000; ++i)
+//	{
+//		a.insert(i);
+//	}
+//	for (auto i = 0; i < 5000; ++i)
+//	{
+//		a.erase(i);
+//	}
+//	for (auto i = 5001; i < 10000; ++i)
+//	{
+//		ASSERT_TRUE(a.contains(i));
+//	}
+//}
+//
+//
+//TEST(SIMPLE_SET, stress_string) {
+//	vecl::simple_set<test> a;
+//
+//	for (auto i = 0; i < 10000; ++i)
+//	{
+//		a.insert(test(std::to_string(i)));
+//	}
+//	for (auto i = 0; i < 5000; ++i)
+//	{
+//		a.erase(test(std::to_string(i)));
+//	}
+//	for (auto i = 5001; i < 10000; ++i)
+//	{
+//		ASSERT_TRUE(a.contains(test(std::to_string(i))));
+//	}
+//}
+//TEST(SIMPLE_SET, stress_string_unordered_set) {
+//	std::unordered_set<test> a;
+//
+//	for (auto i = 0; i < 10000; ++i)
+//	{
+//		a.insert(test(std::to_string(i)));
+//	}
+//	for (auto i = 0; i < 5000; ++i)
+//	{
+//		a.erase(test(std::to_string(i)));
+//	}
+//	for (auto i = 5001; i < 10000; ++i)
+//	{
+//		ASSERT_TRUE(a.contains(test(std::to_string(i))));
+//	}
+//}
+//
+//TEST(SIMPLE_SET, range_constructor) {
+//	std::vector<float> a;
+//	int t = 50;
+//	while (t--)
+//		a.push_back(static_cast<float>(t));
+//
+//	vecl::simple_set<size_t> b(a.begin(), a.end());
+//
+//	ASSERT_EQ(b.size(), a.size());
+//	for (auto i : a)
+//		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
+//
+//}
+//
+//TEST(SIMPLE_SET, capacity_range_constructor) {
+//	std::vector<float> a;
+//	int t = 50;
+//	while (t--)
+//		a.push_back(static_cast<float>(t));
+//
+//	vecl::simple_set<size_t> b(a.begin(), a.end(), 100);
+//
+//	ASSERT_EQ(b.capacity(), 100);
+//	ASSERT_EQ(b.size(), a.size());
+//	for (auto i : a)
+//		ASSERT_EQ(b.count(static_cast<uint32_t>(i)), 1);
+//
+//}
+
 TEST(SIMPLE_SET, il_constructor) {
 	vecl::simple_set<size_t> b{ 1,2,3,4 };
 
@@ -157,6 +279,7 @@ TEST(SIMPLE_SET, il_constructor) {
 	ASSERT_TRUE(b.count(3));
 	ASSERT_TRUE(b.count(4));
 }
+
 TEST(SIMPLE_SET, capacity_il_constructor) {
 	vecl::simple_set<size_t> b({ 1,2,3,4 }, 10);
 
@@ -188,27 +311,6 @@ TEST(SIMPLE_SET, capacity_il_constructor) {
 //
 //}
 //
-TEST(SIMPLE_SET, insert) {
-	vecl::simple_set<int> a;
-	{
-		auto b = a.insert(0);
-		ASSERT_EQ(b, true);
-		ASSERT_EQ(a.size(), 1);
-		ASSERT_EQ(a.count(0), 1);
-	}
-	{
-		auto b = a.insert(0);
-		ASSERT_EQ(b, false);
-		ASSERT_EQ(a.size(), 1);
-		ASSERT_EQ(a.count(0), 1);
-	}
-	{
-		auto b = a.insert(1);
-		ASSERT_EQ(b, true);
-		ASSERT_EQ(a.size(), 2);
-		ASSERT_EQ(a.count(1), 1);
-	}
-}
 //
 //TEST(SIMPLE_SET, find) {
 //	vecl::simple_set a;
@@ -226,33 +328,7 @@ TEST(SIMPLE_SET, insert) {
 //	}
 //}
 //
-//TEST(SIMPLE_SET, erase) {
-//	vecl::simple_set a;
-//	a.emplace_back(0);
-//	a.emplace_back(1);
-//	{
-//		auto it = a.erase(2);
-//		ASSERT_EQ(it, a.end());
-//	}
-//	{
-//		auto it = a.erase(1);
-//		ASSERT_NE(it, a.end());
-//		ASSERT_EQ(*it, 0);
-//	}
-//	{
-//		auto it = a.erase(0);
-//		ASSERT_EQ(it, a.end());
-//	}
-//	a.emplace_back(0);
-//	a.emplace_back(1);
-//	{
-//		auto found = a.find(0);
-//		ASSERT_NE(found, a.end());
-//		auto it = a.erase(found);
-//		ASSERT_NE(it, a.end());
-//		ASSERT_EQ(*it, 1);
-//	}
-//}
+
 //
 //TEST(SIMPLE_SET, swap) {
 //	vecl::simple_set a;

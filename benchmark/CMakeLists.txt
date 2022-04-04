@@ -39,3 +39,4 @@ endfunction()
 
 
 BASIC_TEST(_vector_bench vecl/vector_bench.cpp)
+BASIC_TEST(_hash_bench vecl/hash_bench.cpp)
