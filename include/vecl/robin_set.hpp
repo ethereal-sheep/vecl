@@ -642,6 +642,8 @@ namespace vecl
 					return *data();
 				}
 
+
+
 			private:
 				static constexpr bool _is_sufficiently_trivial =
 					std::is_trivially_default_constructible_v<T> &&
@@ -798,6 +800,7 @@ namespace vecl
 			using const_array_type_reference = const array_type&;
 
 		private:
+
 			static bool _compare_hash(size_t hash, const node_type& node)
 			{
 				if constexpr (StoreHash)
@@ -854,7 +857,11 @@ namespace vecl
 					// case 2: found a slot that my probe > their probe -> override the slot and reinsert their node
 					if (!arr[seq.offset()].alive())
 					{
-						arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						if constexpr (StoreHash)
+							arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						else
+							arr[seq.offset()].construct(probe_count, key);
+
 						max_probes = std::max(probe_count, max_probes);
 						return true;
 					}
@@ -867,7 +874,10 @@ namespace vecl
 					{
 						// steal the slot
 						auto node = std::move(arr[seq.offset()]);
-						arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						if constexpr (StoreHash)
+							arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						else
+							arr[seq.offset()].construct(probe_count, key);
 
 						// call the recursive fn to reinsert for us
 						_insert_into(max_probes, arr, std::move(node));
@@ -929,7 +939,7 @@ namespace vecl
 					}
 					else if (
 						//_compare_hash(seq.hash(), node) &&
-						Equal{}(node.get(), key)) // there should never be this case
+						Equal{}(node.get(), key))
 					{
 						// coliision but its just us
 						return true;
@@ -943,7 +953,6 @@ namespace vecl
 
 			void _insert_into(array_type_reference arr, node_type&& node)
 			{
-
 				size_t hash = 0;
 				if constexpr (StoreHash)
 					hash = node.hash();
@@ -990,7 +999,12 @@ namespace vecl
 					// case 2: found a slot that my probe > their probe -> override the slot and reinsert their node
 					if (!_arr[seq.offset()].alive())
 					{
-						_arr[seq.offset()].construct(seq.hash(), probe_count, key);
+
+						if constexpr (StoreHash)
+							_arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						else
+							_arr[seq.offset()].construct(probe_count, key);
+
 						_max_probes = std::max(probe_count, _max_probes);
 						return true;
 					}
@@ -1003,7 +1017,11 @@ namespace vecl
 					{
 						// steal the slot
 						auto node = std::move(_arr[seq.offset()]);
-						_arr[seq.offset()].construct(seq.hash(), probe_count, key);
+
+						if constexpr (StoreHash)
+							_arr[seq.offset()].construct(seq.hash(), probe_count, key);
+						else
+							_arr[seq.offset()].construct(probe_count, key);
 
 						// call the recursive fn to reinsert for us
 						_insert(std::move(node));
@@ -1097,11 +1115,6 @@ namespace vecl
 				return false;
 			}
 
-			auto _probe_length()
-			{
-				return load_factor() / (1 - load_factor());
-			}
-
 			bool _should_grow()
 			{
 				return load_factor() > 0.75f;
@@ -1114,8 +1127,11 @@ namespace vecl
 				array_type new_arr(new_size);
 				for (auto& ptr : _arr)
 				{
-					ptr.probes = 0; // reset probe_count
-					_insert_into(new_max_probes, new_arr, std::move(ptr));
+					if (ptr.alive())
+					{
+						ptr.probes = 0; // reset probe_count
+						_insert_into(new_max_probes, new_arr, std::move(ptr));
+					}
 				}
 				_arr = std::move(new_arr);
 				_max_probes = new_max_probes;
@@ -1246,6 +1262,9 @@ namespace vecl
 		bool Inlined = true 
 	>
 	class robin_set : public detail::robin_selector_t<T, Hash, Equal, StoreHash, Inlined> {};
+
+
+
 
 } // namespace vecl
 

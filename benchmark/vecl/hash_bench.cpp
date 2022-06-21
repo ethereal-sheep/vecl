@@ -5,6 +5,7 @@
 
 #include <vecl/simple_set.hpp>
 #include <vecl/robin_set.hpp>
+#include <vecl/sparse_set.hpp>
 #include <unordered_set>
 
 #include <benchmark/benchmark.h>
@@ -45,6 +46,26 @@ static void Inserts(benchmark::State& state) {
         state.SetComplexityN(state.range(0));
     }
 }
+template<typename V>
+static void InsertsSparse(benchmark::State& state) {
+    static std::mt19937 generator;
+    for (auto _ : state) {
+        (void)_;
+        state.PauseTiming();
+        auto N = static_cast<size_t>(state.range(0));
+        vecl::sparse_set<V> v(N);
+        state.ResumeTiming();
+
+        for (auto i = 0; i < N; ++i)
+        {
+            v.insert((V)i);
+        }
+
+
+        benchmark::ClobberMemory();
+        state.SetComplexityN(state.range(0));
+    }
+}
 
 template<typename ContainerT, typename V>
 static void RandomInserts(benchmark::State& state) {
@@ -63,6 +84,28 @@ static void RandomInserts(benchmark::State& state) {
                 v.insert(std::to_string(random_array[i]));
             else
                 v.insert((V)random_array[i]);
+        }
+
+
+        benchmark::ClobberMemory();
+        state.SetComplexityN(state.range(0));
+    }
+}
+
+template<std::integral V>
+static void RandomInsertsSparse(benchmark::State& state) {
+    static std::mt19937 generator;
+    for (auto _ : state) {
+        (void)_;
+        state.PauseTiming();
+        auto N = static_cast<size_t>(state.range(0));
+        std::uniform_int_distribution<std::size_t> distribution{ 1, N };
+        vecl::sparse_set<V> v(MAX_MAX);
+        state.ResumeTiming();
+
+        for (auto i = 0; i < N; ++i)
+        {
+            v.insert((V)random_array[i]);
         }
 
 
@@ -249,58 +292,60 @@ static constexpr int STEP = 10;
 BENCHMARK(init_random_array)->Range(1, 1)->Complexity(benchmark::oN);
 
 
-//BENCHMARK_TEMPLATE(Inserts, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(Inserts, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(Inserts, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//
+BENCHMARK_TEMPLATE(Inserts, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+BENCHMARK_TEMPLATE(Inserts, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+BENCHMARK_TEMPLATE(Inserts, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+BENCHMARK_TEMPLATE(InsertsSparse, uint32_t)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+
+//BENCHMARK_TEMPLATE(Inserts, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Inserts, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Inserts, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(Inserts, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
 //
+//BENCHMARK_TEMPLATE(RandomInserts, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomInserts, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomInserts, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(RandomInserts, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomInsertsSparse, uint32_t)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
+//BENCHMARK_TEMPLATE(RandomInserts, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomInserts, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomInserts, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(RandomInserts, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
 //
+//BENCHMARK_TEMPLATE(Lookups, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Lookups, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Lookups, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(Lookups, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-
-BENCHMARK_TEMPLATE(Lookups, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(Lookups, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(Lookups, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-
-
+//
+//BENCHMARK_TEMPLATE(Lookups, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(Lookups, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(Lookups, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//
+//
+//BENCHMARK_TEMPLATE(RandomLookups, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomLookups, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomLookups, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(RandomLookups, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-
-BENCHMARK_TEMPLATE(RandomLookups, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(RandomLookups, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(RandomLookups, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-
-
+//
+//BENCHMARK_TEMPLATE(RandomLookups, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomLookups, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomLookups, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//
+//
+//BENCHMARK_TEMPLATE(Erases, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Erases, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(Erases, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(Erases, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
-BENCHMARK_TEMPLATE(Erases, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(Erases, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(Erases, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(Erases, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(Erases, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(Erases, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
 //
+//BENCHMARK_TEMPLATE(RandomErases, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomErases, vecl::robin_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //BENCHMARK_TEMPLATE(RandomErases, vecl::simple_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-//BENCHMARK_TEMPLATE(RandomErases, std::unordered_set<int>, int)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 //
-BENCHMARK_TEMPLATE(RandomErases, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(RandomErases, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
-BENCHMARK_TEMPLATE(RandomErases, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomErases, std::unordered_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomErases, vecl::robin_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
+//BENCHMARK_TEMPLATE(RandomErases, vecl::simple_set<std::string>, std::string)->RangeMultiplier(STEP)->Range(MIN_SIZE, MAX_SIZE)->Complexity(benchmark::oN);
 
 // Run the benchmark
 BENCHMARK_MAIN();

@@ -6,6 +6,7 @@
 #endif
 
 #include "config/config.h"
+#include "small_vector.hpp"
 
 #include <memory_resource> // pmr::memory_resource
 #include <vector> // pmr::vector

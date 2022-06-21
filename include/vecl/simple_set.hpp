@@ -19,14 +19,17 @@ namespace vecl
 	// ProbePolicy - Linear | Quadratic | Double
 	// HeterogeneousLookup
 
-	constexpr size_t hashtable_powers_of_two[] = 
-		{ 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 
-		8192, 16384, 32768, 65536, 131072, 262144, 524288, 
-		1048576, 2097152, 4194304, 8388608, 16777216, 
-		33554432, 67108864, 134217728, 268435456, 536870912, 
+	namespace detail
+	{
+
+		constexpr size_t hashtable_powers_of_two[] =
+		{ 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
+		8192, 16384, 32768, 65536, 131072, 262144, 524288,
+		1048576, 2097152, 4194304, 8388608, 16777216,
+		33554432, 67108864, 134217728, 268435456, 536870912,
 		1073741824, 2147483648, 4294967296, 8589934592 };
 
-	constexpr size_t hashtable_primes[] =
+		constexpr size_t hashtable_primes[] =
 		{ 11, 17, 29, 53, 97, 193, 389, 769, 1543, 3079,
 		6151, 12289, 24593, 49157, 98317,
 		196613, 393241, 786433, 1572869,
@@ -35,91 +38,196 @@ namespace vecl
 		402653189, 805306457, 1610612741 };
 
 
-	struct power_of_two_growth
-	{
-		// always start with 8
-		constexpr size_t start(size_t requested) const
-		{	
-			return *std::upper_bound(
-				std::begin(hashtable_powers_of_two),
-				std::end(hashtable_powers_of_two),
-				requested);
-		}
-
-		constexpr size_t next(size_t current) const
+		struct power_of_two_growth
 		{
-			return current << 1;
-		}
-	};
+			// always start with 8
+			constexpr size_t start(size_t requested) const
+			{
+				return *std::upper_bound(
+					std::begin(hashtable_powers_of_two),
+					std::end(hashtable_powers_of_two),
+					requested);
+			}
+
+			constexpr size_t next(size_t current) const
+			{
+				return current << 1;
+			}
+		};
+
+		struct prime_growth
+		{
+			// always start with 11
+			constexpr size_t start(size_t requested) const
+			{
+				return *std::upper_bound(
+					std::begin(hashtable_primes),
+					std::end(hashtable_primes),
+					requested);
+			}
+
+			constexpr size_t next(size_t current) const
+			{
+				return *std::upper_bound(
+					std::begin(hashtable_primes),
+					std::end(hashtable_primes),
+					current + 1);
+			}
+		};
+
+		template<typename LazyTValue, typename TValue>
+		struct is_lazy_value
+		{
+			static constexpr bool value = std::regular_invocable<LazyTValue> &&
+				std::is_same<TValue, std::decay<std::invoke_result_t<LazyTValue>>>::value;
+		};
+
+		template<typename LazyTValue, typename TValue>
+		static constexpr bool is_lazy_value_v = is_lazy_value<LazyTValue, TValue>::value;
+
+		template<typename LazyTValue, typename TValue>
+		concept lazy_value = is_lazy_value_v<LazyTValue, TValue>;
+
+
+		template<typename TKey, typename TValue>
+		struct map_lookup_result
+		{
+			explicit operator bool() const { return _key != nullptr; }
+
+			TKey& key() const { return *_key; }
+			TValue& value() const { return *_value; }
+
+		private:
+			TKey* _key = nullptr;
+			TValue* _value = nullptr;
+		};
+
+		template<typename TKey, typename TValue>
+		struct map_insert_result
+		{
+			explicit operator bool() const { return _inserted; }
+
+			TKey& key() const { return *_key; }
+			TValue& value() const { return *_value; }
+
+		private:
+			TKey* _key = nullptr;
+			TValue* _value = nullptr;
+			bool _inserted;
+		};
+
+		template<typename TKey, typename TValue>
+		struct map_remove_result
+		{
+			explicit operator bool() const { return _key; }
+
+			TKey& key() { return *_key; }
+			TValue& value() { return *_value; }
+
+			TKey take_key() const { return *std::move(_key); }
+			TValue take_value() const { return *std::move(_value); }
+		private:
+			std::optional<TKey> _key;
+			std::optional<TValue> _value;
+		};
+
+
+		template<
+			typename TKey,
+			typename TValue,
+			typename Hash = std::hash<TKey>,
+			typename Equal = std::equal_to<TKey>
+		>
+			struct map_interface
+		{
+			using size_type = size_t;
+			using hash_type = Hash;
+			using equal_type = Equal;
+			using lookup_result_type = map_lookup_result<TKey, TValue>;
+			using insert_result_type = map_insert_result<TKey, TValue>;
+			using remove_result_type = map_remove_result<TKey, TValue>;
+
+			template<typename TOther>
+			auto lookup(const TOther&) const->lookup_result_type;
+
+			template<typename TOther>
+			auto insert(const TOther&, TValue)->insert_result_type;
+
+			template<typename TOther, lazy_value LazyTValue>
+			auto insert(const TOther&, LazyTValue&)->insert_result_type;
+
+			template<typename TOther>
+			auto update(const TOther&, TValue)->insert_result_type;
+
+			template<typename TOther, lazy_value LazyTValue>
+			auto update(const TOther&, LazyTValue&)->insert_result_type;
+
+			template<typename TOther>
+			auto remove(const TOther&)->remove_result_type;
+
+			auto operator[](const TKey&)->TValue&;
+
+			auto operator[](const TKey&) const->const TValue&;
+
+			auto clear() -> void;
+
+			template<typename TOther>
+			auto contains(const TOther&) const -> bool;
+
+			auto size() const->size_type;
+		};
+
+
+		template<size_t Width, bool PowerOfTwo>
+		struct linear_probe_seq
+		{
+			linear_probe_seq(size_t hash, size_t size)
+				: _hash{ hash }, _size{ size }, _offset{ _hash % _size }, _index{ 0 } {}
+
+			void next()
+			{
+				_index += Width;
+				_offset = _hash + _index;
+
+				if constexpr (PowerOfTwo)
+					_offset &= (_size - 1);
+				else
+					_offset %= _size;
+			}
+
+			void advance(int i)
+			{
+				_index += (Width * i);
+				_offset = _hash + _index;
+
+				if constexpr (PowerOfTwo)
+					_offset &= (_size - 1);
+				else
+					_offset %= _size;
+			}
+
+			auto index() const { return _index; }
+			auto hash() const { return _hash; }
+			auto offset() const { return _offset; }
+			auto offset(int i) const
+			{
+				if constexpr (PowerOfTwo)
+					return (_hash + _index + i) & (_size - 1);
+				else
+					return (_hash + _index + i) % _size;
+			}
+
+		private:
+			size_t _hash;
+			size_t _size;
+			size_t _offset;
+			int _index;
+		};
+
+	}
+
 	
-	struct prime_growth
-	{
-		// always start with 11
-		constexpr size_t start(size_t requested) const
-		{
-			return *std::upper_bound(
-				std::begin(hashtable_primes),
-				std::end(hashtable_primes),
-				requested);
-		}
-
-		constexpr size_t next(size_t current) const
-		{
-			return *std::upper_bound(
-				std::begin(hashtable_primes),
-				std::end(hashtable_primes),
-				current + 1);
-		}
-	};
-
-	template<size_t Width, bool PowerOfTwo>
-	struct linear_probe_seq
-	{
-		linear_probe_seq(size_t hash, size_t size)
-			: _hash{ hash }, _size{ size }, _offset{ _hash % _size }, _index{ 0 } {}
-
-		void next()
-		{
-			_index += Width;
-			_offset = _hash + _index;
-
-			if constexpr (PowerOfTwo)
-				_offset &= (_size-1);
-			else
-				_offset %= _size;
-		}
-
-		void advance(int i)
-		{
-			_index += (Width * i);
-			_offset = _hash + _index;
-
-			if constexpr (PowerOfTwo)
-				_offset &= (_size - 1);
-			else
-				_offset %= _size;
-		}
-
-		auto index() const { return _index; }
-		auto hash() const { return _hash; }
-		auto offset() const { return _offset; }
-		auto offset(int i) const 
-		{
-			if constexpr (PowerOfTwo)
-				return (_hash + _index + i) & (_size - 1);
-			else
-				return (_hash + _index + i) % _size;
-		}
-
-	private:
-		size_t _hash;
-		size_t _size;
-		size_t _offset;
-		int _index;
-	};
-
-	
-	// use open addressing
+	// use open + stable addressing
 	// and linear probing
 	template<
 		typename T, 
@@ -233,9 +341,9 @@ namespace vecl
 		using const_array_type_reference = const array_type&;
 		using key_type = T;
 		using size_type = size_t;
-		using growth_policy = prime_growth;
-		static constexpr bool using_power_of_two_growth = std::is_same_v<growth_policy, power_of_two_growth>;
-		using probe_type = linear_probe_seq<1, using_power_of_two_growth>;
+		using growth_policy = detail::prime_growth;
+		static constexpr bool using_power_of_two_growth = std::is_same_v<growth_policy, detail::power_of_two_growth>;
+		using probe_type = detail::linear_probe_seq<1, using_power_of_two_growth>;
 
 	private:
 		template<typename... TArgs>

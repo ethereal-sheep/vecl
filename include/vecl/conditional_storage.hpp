@@ -1,4 +1,5 @@
 #ifndef VECL_CONDITIONAL_STORAGE_HPP
+#define VECL_CONDITIONAL_STORAGE_HPP
 
 #include "config/config.h"
 

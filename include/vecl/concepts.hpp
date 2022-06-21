@@ -22,7 +22,8 @@ namespace vecl
 	concept non_void_invocable = 
 		std::regular_invocable<F, Args...> &&
 		!std::is_same<void, std::invoke_result_t<F, Args...>>::value;
-	
+
+
 }
 
 #endif
